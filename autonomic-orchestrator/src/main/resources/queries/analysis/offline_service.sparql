@@ -1,0 +1,17 @@
+prefix : <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix sosa: <http://www.w3.org/ns/sosa#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+delete { ?service :hasState :OnlineState} 
+insert { ?service :hasState :OfflineState}  
+where { ?sensor rdf:type :SensorUnit . 
+?service rdf:type :Service . 
+?observation rdf:type sosa:Observation . 
+?observation sosa:madeBySensor  ?sensor . 
+?sensor :hasService  ?service . 
+?observation sosa:resultTime ?time . 
+?service :hasState :OnlineState . 
+:DateTimeNow :hasValue ?now . 
+filter(?time < ?now - 300000) . 
+}

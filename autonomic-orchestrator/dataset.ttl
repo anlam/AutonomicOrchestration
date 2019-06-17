@@ -1,0 +1,86 @@
+@prefix :      <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sai:   <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#> .
+@prefix sosa:  <http://www.w3.org/ns/sosa#> .
+
+:Consumer  a             rdfs:Class ;
+        rdfs:subClassOf  :ApplicationSystem .
+
+:ApplicationSystem  a  rdfs:Class .
+
+:Service  a     rdfs:Class .
+
+:SensorUnit  a           rdfs:Class ;
+        rdfs:subClassOf  :Device .
+
+:Device  a      rdfs:Class .
+
+:PrediktorApisServer  a   :Consumer ;
+        :consumesService  :Service_3244631 ;
+        :hasID            "PrediktorApisServer" ;
+        :producesService  :PrediktorAutoOrchPush .
+
+:Service_3244631  a  :Service ;
+        :hasID     "3244631" ;
+        :hasState  :OfflineState .
+
+:Device_2999285  a        :SensorUnit ;
+        :hasID            "2999285" ;
+        :hasService       :Service_2999285 ;
+        sosa:hasLocation  :TopMiddle .
+
+:Service_2999285  a  :Service ;
+        :hasID     "2999285" ;
+        :hasState  :OnlineState .
+
+sosa:Observation  a  rdfs:Class .
+
+:Observation_3244631  a            sosa:Observation ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "8888"^^xsd:double ;
+        sosa:madeBySensor          :Device_3244631 ;
+        sosa:resultTime            1560768290813 .
+
+:Device_3244631  a        :SensorUnit ;
+        :hasID            "3244631" ;
+        :hasService       :Service_3244631 ;
+        sosa:hasLocation  :TopMiddle .
+
+:Observation_2999285  a            sosa:Observation ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "1000"^^xsd:double ;
+        sosa:madeBySensor          :Device_2999285 ;
+        sosa:resultTime            1560772584438 .
+
+:ServiceState  a  rdfs:Class .
+
+:OfflineState  a  :ServiceState .
+
+:OnlineState  a  :ServiceState .
+
+:DateTimeNow  :hasValue  1560772599504 .
+
+sosa:FeatureOfInterest
+        a       rdfs:Class .
+
+:Temperature  a  sosa:FeatureOfInterest .
+
+:PartLocation  a  rdfs:Class .
+
+:TopMiddle  a   :PartLocation .
+
+:Producer  a             rdfs:Class ;
+        rdfs:subClassOf  :ApplicationSystem .
+
+:TellUConnector  a        :Producer ;
+        :producesService  :Service_3244631 , :Service_2999285 .
+
+:PrediktorAutoOrchPush
+        a                      :Service ;
+        :hasOperation          :PrediktorAutoOrchOper ;
+        :hasServiceDefinition  "AutonomicOrchestrationPush" .
+
+:PrediktorAutoOrchOper
+        :hasAddress  "http://localhost:6969/orchestration/auto" .
