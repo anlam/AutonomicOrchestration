@@ -13,4 +13,6 @@ public class Constants {
 	public static final long AnalysisWorkerInterval = 1000;
 	public static final long PlanWorkerInterval = 1000;
 	public static final long ExecuteWorkerInterval = 1000;
+	
+	public static final String OrchestrationPushServiceDefinition = "AutonomicOrchestrationPush";
 }

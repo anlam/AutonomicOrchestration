@@ -27,16 +27,20 @@ public class ExecuteWorker implements Runnable {
 
 		System.out.println("Thread " + name + " running.");
 		isRunning = true;
-		try {
-			while (isRunning) {
-				// consumeService();
-				// Let the thread sleep for a while.
-				execute.WorkerProcess();
-				Thread.sleep(interval);
+		while(isRunning)
+		{
+			try {
+					// consumeService();
+					// Let the thread sleep for a while.
+					execute.WorkerProcess();
+					Thread.sleep(interval);
+				
+			} catch (Exception e) {
+				System.out.println("Thread " + name + " interrupted. Reason: " + e.getMessage());
+				e.printStackTrace();
 			}
-		} catch (InterruptedException e) {
-			System.out.println("Thread " + name + " interrupted.");
 		}
+
 		System.out.println("Thread " + name + " exiting.");
 	}
 

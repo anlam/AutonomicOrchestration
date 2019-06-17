@@ -2,6 +2,7 @@ package eu.arrowhead.autonomic.orchestrator.manager.plan;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -23,18 +24,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
+import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.AdaptationPlan;
-import eu.arrowhead.autonomic.orchestrator.manager.plan.model.PlanStatus;
 
 public class Plan {
 
 	private PlanWorker planWorker;
-	private TreeMap<String, List<Rule>> rules;
+	private TreeMap<String, List<Rule>> ConsumerRulesTreeMap;
 	private TreeMap<String, Long> ruleLastUpdated;
 	
 	
-	private TreeMap<String, AdaptationPlan> AdaptationPlans;
+	private TreeMap<String, AdaptationPlan> ConsumerAdaptationPlansTreeMap;
 	private ReentrantLock updatePlanLock;
 	
 	private static final Logger log = LoggerFactory.getLogger( Plan.class );
@@ -45,13 +46,13 @@ public class Plan {
 	
 	public Plan()
 	{
-		rules = new TreeMap<String, List<Rule>>();
+		ConsumerRulesTreeMap = new TreeMap<String, List<Rule>>();
 		ruleLastUpdated = new TreeMap<String, Long>();
 		planWorker = new PlanWorker(this, Constants.PlanWorkerInterval);
 		
 		BuiltinRegistry.theRegistry.register(new SubstitutionServiceBuiltin(this));
 		
-		AdaptationPlans = new TreeMap<String, AdaptationPlan>();
+		ConsumerAdaptationPlansTreeMap = new TreeMap<String, AdaptationPlan>();
 		updatePlanLock =  new ReentrantLock();
 	}
 	
@@ -62,7 +63,7 @@ public class Plan {
 		updatePlanLock.lock();
 		try
 		{
-			AdaptationPlans.put(name, plan);
+			ConsumerAdaptationPlansTreeMap.put(name, plan);
 		}
 		finally {
 			updatePlanLock.unlock();
@@ -77,8 +78,8 @@ public class Plan {
 		
 		try
 		{
-			if(AdaptationPlans.containsKey(name))
-				ret = AdaptationPlans.get(name);
+			if(ConsumerAdaptationPlansTreeMap.containsKey(name))
+				ret = ConsumerAdaptationPlansTreeMap.get(name);
 		}
 		finally 
 		{
@@ -122,30 +123,31 @@ public class Plan {
 		log.debug("Planning Reasoning Rules");
 		System.out.println("Planning Reasoning Rules");
 		
-		
-		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
-		dataset.begin(ReadWrite.READ);
-		
-		try {
-			
-			Model model = dataset.getNamedModel(OntologyNames.BASE_URL +  Constants.ModelName);
-			
-			
-			Reasoner reasoner = new GenericRuleReasoner( Rule.rulesFromURL(Constants.planQueriesDir + "sub.rule") );
-			
-			InfModel infModel = ModelFactory.createInfModel( reasoner, model );
-
-			infModel.prepare();
-			
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally {
-			dataset.end();
-			
-		}
+		List<Rule> rules = new ArrayList<Rule>();
+		for(List<Rule> rls : ConsumerRulesTreeMap.values())
+			rules.addAll(rls);
+		KnowledgeBase.getInstance().Reasoning(rules);
+		/*
+		 * Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
+		 * dataset.begin(ReadWrite.READ);
+		 * 
+		 * try {
+		 * 
+		 * Model model = dataset.getNamedModel(OntologyNames.BASE_URL +
+		 * Constants.ModelName);
+		 * 
+		 * 
+		 * Reasoner reasoner = new GenericRuleReasoner(
+		 * Rule.rulesFromURL(Constants.planQueriesDir + "sub.rule") );
+		 * 
+		 * InfModel infModel = ModelFactory.createInfModel( reasoner, model );
+		 * 
+		 * infModel.prepare();
+		 * 
+		 * } catch(Exception e) { e.printStackTrace(); } finally { dataset.end();
+		 * 
+		 * }
+		 */
 	}
 	
 	
@@ -176,11 +178,25 @@ public class Plan {
 						continue;
 				}
 				
-				List<Rule> query =  Rule.rulesFromURL(f.getAbsolutePath());
-				rules.put(name, query);
+				List<Rule> rules =  Rule.rulesFromURL(f.getAbsolutePath());
+				
+				
+				
+				name = name.substring(0, name.length() - 5);
+				
+				List<Rule> modifiedRules = new ArrayList<Rule>();
+				
+				int i = 1;
+				for(Rule r : rules)
+				{
+					Rule newRule = new Rule(name + "_rule" + i , r.getHead(), r.getBody());
+					modifiedRules.add(newRule);
+				}
+					
+				ConsumerRulesTreeMap.put(name, modifiedRules);
 				ruleLastUpdated.put(name, f.lastModified());
 				
-				log.debug("New rule registered: " + name);
+				log.debug("New rule registered for consumer: " + name);
 				System.out.println("New query registered: " + name);
 				
 				

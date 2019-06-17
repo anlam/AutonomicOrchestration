@@ -27,8 +27,9 @@ public class SubstitutionServiceBuiltin extends BaseBuiltin {
 	@Override
 	public void headAction(Node[] args, int length, RuleContext context) {
 		System.out.println("Substitution");
-		System.out.println("Rule: " + context.getRule().toString());
-		
+		System.out.println("Rule: " + context.getRule().getName());
+		for(Node n : args)
+			System.out.println(n.toString());
 		plan.ExecuteSustitionPlan();
 	}
 

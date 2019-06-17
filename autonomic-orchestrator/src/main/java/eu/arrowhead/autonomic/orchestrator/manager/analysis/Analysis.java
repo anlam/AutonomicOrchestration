@@ -47,7 +47,7 @@ public class Analysis {
 		System.out.println("Analysis executing queris");
 		
 		
-		KnowledgeBase.getInstance().ExecuteQuery(new ArrayList<String>(queries.values()));
+		KnowledgeBase.getInstance().ExecuteUpdateQueries(new ArrayList<String>(queries.values()));
 		
 		//KnowledgeBase.getInstance().WriteModelToFile("./dataset.ttl");
 	}

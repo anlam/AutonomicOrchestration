@@ -91,7 +91,7 @@ public class Monitor {
 		queries.add(updateCurentTimeQuery);
 		//queries.add(offlineString);
 		//queries.add(onlineString);
-		KnowledgeBase.getInstance().ExecuteQuery(queries);
+		KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);
 		
 		
 		//KnowledgeBase.getInstance().WriteModelToFile("./dataset.ttl");

@@ -1,0 +1,6 @@
+@prefix : <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
+@prefix sosa: <http://www.w3.org/ns/sosa#> . 
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> . 
+[rule1: (?c rdf:type :Consumer) (?c :consumesService ?s1) (?s1  :hasState  :OfflineState) (?p1 :producesService ?s1) (?d1 :hasService ?s1)  (?d1 sosa:hasLocation ?l) (?d2 :hasService ?s2) (?d2  sosa:hasLocation ?l) (?s2  :hasState  :OnlineState) (?p2 :producesService ?s2)-> substituteService(?c, ?s1, ?p1, ?s2, ?p2) (?c :substitudeFrom ?s1) (?c :substitudeTo ?s2) ]

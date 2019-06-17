@@ -15,8 +15,13 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.reasoner.Reasoner;
+import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
+import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.update.UpdateAction;
 import org.apache.jena.vocabulary.RDF;
@@ -66,7 +71,7 @@ public class KnowledgeBase {
 		queries.add(updateCurentTimeQuery);
 		//queries.add(offlineString);
 		//queries.add(onlineString);
-		KnowledgeBase.getInstance().ExecuteQuery(queries);
+		KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);
 		KnowledgeBase.getInstance().WriteModelToFile("./dataset.ttl");
 		//KnowledgeBase.getInstance().ExecuteQuery(queries);
 
@@ -130,13 +135,46 @@ public class KnowledgeBase {
 		}
 	}
 	
-	public void ExecuteQuery(List<String> queries)
+	public List<QuerySolution> ExecuteSelectQuery(String queries) {
+		// lock.lock();
+		List<QuerySolution> ret = new ArrayList<QuerySolution>();
+		log.debug("Knowledgebase Executing Select query");
+		System.out.println("Knowledgebase Executing Select query");
+
+		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
+		dataset.begin(ReadWrite.READ);
+
+		try {
+			Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
+
+			Query query = QueryFactory.create(queries);
+			try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+				ResultSet results = qexec.execSelect();
+
+				for (; results.hasNext();) {
+					QuerySolution soln = results.nextSolution();
+					ret.add(soln);
+					
+				}
+			}
+		} catch (Exception e) {
+			log.debug("Fail to execute query: " + e.getMessage());
+			System.err.println("Fail to execute query: " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			dataset.end();
+		}
+
+		return ret;
+	}
+	
+	public void ExecuteUpdateQueries(List<String> queries)
 	{
 		lock.lock();
 		//AddService(serviceName);
 		
-		log.debug("Knowledgebase Executing queries" );
-		System.out.println("Knowledgebase Executing queries");
+		log.debug("Knowledgebase Executing Update queries" );
+		System.out.println("Knowledgebase Executing Update queries");
 		
 		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
 		dataset.begin(ReadWrite.WRITE);
@@ -171,7 +209,38 @@ public class KnowledgeBase {
 		}
 		finally {
 			dataset.end();
-			lock.unlock();
+		}
+	}
+	
+	public void Reasoning(List<Rule> rules)
+	{
+		log.debug("Knowledgebase Reasoning Rules");
+		System.out.println("Knowledgebase Reasoning Rules");
+		
+		
+		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
+		dataset.begin(ReadWrite.READ);
+		
+		try {
+			
+			Model model = dataset.getNamedModel(OntologyNames.BASE_URL +  Constants.ModelName);
+			
+			
+			Reasoner reasoner = new GenericRuleReasoner( rules);
+			
+			InfModel infModel = ModelFactory.createInfModel( reasoner, model );
+
+			infModel.prepare();
+			
+		}
+		catch(Exception e)
+		{
+			log.debug("Fail to reason rules: " + e.getMessage());
+			System.err.println("Fail to reason rules:  " + e.getMessage());
+			e.printStackTrace();
+		}
+		finally {
+			dataset.end();
 		}
 	}
 	

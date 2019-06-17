@@ -26,15 +26,17 @@ public class PlanWorker implements Runnable{
 
 		System.out.println("Thread " + name + " running.");
 		isRunning = true;
+		while (isRunning) {
 		try {
-			while (isRunning) {
+			
 				// consumeService();
 				// Let the thread sleep for a while.
 				plan.WorkerProcess();
 				Thread.sleep(interval);
-			}
-		} catch (InterruptedException e) {
-			System.out.println("Thread " + name + " interrupted.");
+			
+		} catch (Exception e) {
+			System.out.println("Thread " + name + " interrupted. Reason: " + e.getMessage());
+		}
 		}
 		System.out.println("Thread " + name + " exiting.");
 	}
