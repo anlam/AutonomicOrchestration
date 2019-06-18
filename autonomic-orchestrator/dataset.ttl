@@ -33,7 +33,7 @@
 
 :Service_2999285  a  :Service ;
         :hasID     "2999285" ;
-        :hasState  :OnlineState .
+        :hasState  :OfflineState .
 
 sosa:Observation  a  rdfs:Class .
 
@@ -60,7 +60,7 @@ sosa:Observation  a  rdfs:Class .
 
 :OnlineState  a  :ServiceState .
 
-:DateTimeNow  :hasValue  1560772599504 .
+:DateTimeNow  :hasValue  1560870495967 .
 
 sosa:FeatureOfInterest
         a       rdfs:Class .

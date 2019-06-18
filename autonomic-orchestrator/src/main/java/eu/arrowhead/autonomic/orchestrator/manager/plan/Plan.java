@@ -26,7 +26,9 @@ import org.slf4j.LoggerFactory;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
+import eu.arrowhead.autonomic.orchestrator.manager.plan.model.Adaptation;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.AdaptationPlan;
+import eu.arrowhead.autonomic.orchestrator.manager.plan.model.PlanStatus;
 
 public class Plan {
 
@@ -39,10 +41,6 @@ public class Plan {
 	private ReentrantLock updatePlanLock;
 	
 	private static final Logger log = LoggerFactory.getLogger( Plan.class );
-	
-
-	
-	
 	
 	public Plan()
 	{
@@ -58,12 +56,22 @@ public class Plan {
 	
 	
 	
-	public void UpdateAdaptationPlan(String name, AdaptationPlan plan)
+	public void UpdateAdaptationPlan(String name, Adaptation adapt)
 	{
 		updatePlanLock.lock();
 		try
 		{
-			ConsumerAdaptationPlansTreeMap.put(name, plan);
+			AdaptationPlan adaptationPlan = ConsumerAdaptationPlansTreeMap.get(name);
+			if(adaptationPlan == null)
+				adaptationPlan = new AdaptationPlan(name);
+			if(!adaptationPlan.getAdaptations().contains(adapt))
+			{
+				adaptationPlan.getAdaptations().add(adapt);
+				
+				if(adapt.getStatus() ==  PlanStatus.NEW)
+					adaptationPlan.setStatus(PlanStatus.NEW);
+			}
+			ConsumerAdaptationPlansTreeMap.put(name, adaptationPlan);
 		}
 		finally {
 			updatePlanLock.unlock();
@@ -79,7 +87,10 @@ public class Plan {
 		try
 		{
 			if(ConsumerAdaptationPlansTreeMap.containsKey(name))
-				ret = ConsumerAdaptationPlansTreeMap.get(name);
+			{
+				AdaptationPlan plan = ConsumerAdaptationPlansTreeMap.get(name);
+				ret = (AdaptationPlan) plan.clone();
+			}
 		}
 		finally 
 		{
@@ -87,6 +98,25 @@ public class Plan {
 		}
 		
 		return ret;
+	}
+	
+	public void RemoveAdaptationPlans(String name, List<Adaptation> adapts)
+	{
+		updatePlanLock.lock();
+		
+		
+		try
+		{
+			if(ConsumerAdaptationPlansTreeMap.containsKey(name))
+			{
+				AdaptationPlan plan = ConsumerAdaptationPlansTreeMap.get(name);
+				plan.getAdaptations().removeAll(adapts);
+			}
+		}
+		finally 
+		{
+			updatePlanLock.unlock();
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -108,7 +138,7 @@ public class Plan {
 		planWorker.stop();
 	}
 	
-	public void ExecuteSustitionPlan()
+	public void ProcessExecutedAdaptationPlan(String consumerName, List<Adaptation> executedAdapts)
 	{
 		
 	}
@@ -167,6 +197,7 @@ public class Plan {
 				
 				
 				String name = f.getName();
+				name = name.substring(0, name.length() - 5);
 				
 				//Check if file recently updated
 				if(ruleLastUpdated.containsKey(name))
@@ -182,7 +213,7 @@ public class Plan {
 				
 				
 				
-				name = name.substring(0, name.length() - 5);
+				
 				
 				List<Rule> modifiedRules = new ArrayList<Rule>();
 				
@@ -196,8 +227,8 @@ public class Plan {
 				ConsumerRulesTreeMap.put(name, modifiedRules);
 				ruleLastUpdated.put(name, f.lastModified());
 				
-				log.debug("New rule registered for consumer: " + name);
-				System.out.println("New query registered: " + name);
+				log.debug("New query registered for consumer: " + name);
+				System.out.println("New query registered for consumer: " + name);
 				
 				
 			}

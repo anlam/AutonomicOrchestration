@@ -3,7 +3,7 @@ package eu.arrowhead.autonomic.orchestrator.manager.plan.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdaptationPlan {
+public class AdaptationPlan implements Cloneable {
 	
 	
 	private String systemName;
@@ -17,6 +17,13 @@ public class AdaptationPlan {
 		adaptations = new ArrayList<Adaptation>();
 	}
 	
+	@Override
+	public Object clone() {
+		AdaptationPlan plan = new AdaptationPlan(systemName);
+		plan.setStatus(getStatus());
+		plan.setAdaptations(new ArrayList<Adaptation>(adaptations));
+		return plan;
+	}
 	
 	public String getSystemName() {
 		return systemName;

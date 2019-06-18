@@ -15,4 +15,6 @@ public class Constants {
 	public static final long ExecuteWorkerInterval = 1000;
 	
 	public static final String OrchestrationPushServiceDefinition = "AutonomicOrchestrationPush";
+	
+	public static final int SubstitutionParameterSize = 6;
 }

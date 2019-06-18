@@ -136,7 +136,8 @@ public class KnowledgeBase {
 	}
 	
 	public List<QuerySolution> ExecuteSelectQuery(String queries) {
-		// lock.lock();
+		
+		lock.lock();
 		List<QuerySolution> ret = new ArrayList<QuerySolution>();
 		log.debug("Knowledgebase Executing Select query");
 		System.out.println("Knowledgebase Executing Select query");
@@ -148,21 +149,23 @@ public class KnowledgeBase {
 			Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
 
 			Query query = QueryFactory.create(queries);
-			try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
-				ResultSet results = qexec.execSelect();
+			QueryExecution qexec = QueryExecutionFactory.create(query, model);
 
-				for (; results.hasNext();) {
-					QuerySolution soln = results.nextSolution();
-					ret.add(soln);
-					
-				}
+			ResultSet results = qexec.execSelect();
+
+			for (; results.hasNext();) {
+				QuerySolution soln = results.nextSolution();
+				ret.add(soln);
+
 			}
+
 		} catch (Exception e) {
 			log.debug("Fail to execute query: " + e.getMessage());
 			System.err.println("Fail to execute query: " + e.getMessage());
-			e.printStackTrace();
+			// e.printStackTrace();
 		} finally {
 			dataset.end();
+			lock.unlock();
 		}
 
 		return ret;
@@ -191,12 +194,14 @@ public class KnowledgeBase {
 			}
 			
 			
-			/*
-			 * model.setNsPrefix("sosa", OntologyNames.SOSA_URL); model.setNsPrefix(":",
-			 * OntologyNames.BASE_URL); model.setNsPrefix("rdfs", RDFS.uri);
-			 * model.setNsPrefix("xsd", XSD.NS); model.write(new FileOutputStream(new
-			 * File("./dataset.ttl")), "TTL" );
-			 */
+			
+			  model.setNsPrefix("sosa", OntologyNames.SOSA_URL); model.setNsPrefix(":",
+			  OntologyNames.BASE_URL); model.setNsPrefix("rdfs", RDFS.uri);
+			  model.setNsPrefix("xsd", XSD.NS); model.write(new FileOutputStream(new
+			  File("./dataset.ttl")), "TTL" );
+			 
+			
+			
 			
 			dataset.commit();
 			
@@ -209,11 +214,13 @@ public class KnowledgeBase {
 		}
 		finally {
 			dataset.end();
+			lock.unlock();
 		}
 	}
 	
 	public void Reasoning(List<Rule> rules)
 	{
+		lock.lock();
 		log.debug("Knowledgebase Reasoning Rules");
 		System.out.println("Knowledgebase Reasoning Rules");
 		
@@ -223,6 +230,7 @@ public class KnowledgeBase {
 		
 		try {
 			
+			
 			Model model = dataset.getNamedModel(OntologyNames.BASE_URL +  Constants.ModelName);
 			
 			
@@ -230,6 +238,10 @@ public class KnowledgeBase {
 			
 			InfModel infModel = ModelFactory.createInfModel( reasoner, model );
 
+			
+			//System.out.println("Knowledgebase Reasoning Rules prepare");
+			
+			
 			infModel.prepare();
 			
 		}
@@ -241,6 +253,7 @@ public class KnowledgeBase {
 		}
 		finally {
 			dataset.end();
+			lock.unlock();
 		}
 	}
 	
@@ -319,11 +332,6 @@ public class KnowledgeBase {
 			  UpdateAction.parseExecute(addString, model);
 		  }
 		  
-			
-			  model.setNsPrefix("sosa", OntologyNames.SOSA_URL); model.setNsPrefix(":",
-			  OntologyNames.BASE_URL); model.setNsPrefix("rdfs", RDFS.uri);
-			  model.setNsPrefix("xsd", XSD.NS); model.write(new FileOutputStream(new
-			  File("./dataset.ttl")), "TTL");
 			 
 		  
 		  dataset.commit();

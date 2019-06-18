@@ -10,6 +10,7 @@ public class SubstitutionAdaptation extends Adaptation{
 	
 	public SubstitutionAdaptation()
 	{
+		super();
 		type = "Substitution";
 	}
 
@@ -44,11 +45,11 @@ public class SubstitutionAdaptation extends Adaptation{
 	public void setToProducer(String toProducer) {
 		ToProducer = toProducer;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((FromProducer == null) ? 0 : FromProducer.hashCode());
 		result = prime * result + ((FromService == null) ? 0 : FromService.hashCode());
 		result = prime * result + ((ToProducer == null) ? 0 : ToProducer.hashCode());
@@ -56,11 +57,13 @@ public class SubstitutionAdaptation extends Adaptation{
 		return result;
 	}
 
+
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

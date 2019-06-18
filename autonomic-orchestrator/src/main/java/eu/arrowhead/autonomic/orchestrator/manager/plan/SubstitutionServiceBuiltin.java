@@ -1,5 +1,7 @@
 package eu.arrowhead.autonomic.orchestrator.manager.plan;
 
+import java.util.ArrayList;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
@@ -26,11 +28,16 @@ public class SubstitutionServiceBuiltin extends BaseBuiltin {
 
 	@Override
 	public void headAction(Node[] args, int length, RuleContext context) {
-		System.out.println("Substitution");
-		System.out.println("Rule: " + context.getRule().getName());
+		
+		//System.out.println("Rule: " + context.getRule().getName());
+		ArrayList<String> parameters = new ArrayList<String>();
+		parameters.add(context.getRule().getName());
 		for(Node n : args)
-			System.out.println(n.toString());
-		plan.ExecuteSustitionPlan();
+			parameters.add(n.getLocalName());
+			//System.out.println(n.toString());
+		SubstitutionWorker worker = new SubstitutionWorker(plan, parameters);
+		worker.start();
+		
 	}
 
 }
