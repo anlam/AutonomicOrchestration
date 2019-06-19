@@ -36,7 +36,7 @@ public class MonitorWorker implements Runnable {
 				Thread.sleep(interval);
 			
 		} catch (Exception e) {
-			System.out.println("Thread " + name + " interrupted. Reason: " + e.getMessage());
+			System.err.println("Thread " + name + " interrupted. Reason: " + e.getMessage());
 		}
 		}
 		System.out.println("Thread " + name + " exiting.");

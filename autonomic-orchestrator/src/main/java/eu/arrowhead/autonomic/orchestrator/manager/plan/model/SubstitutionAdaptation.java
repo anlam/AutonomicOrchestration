@@ -1,59 +1,81 @@
 package eu.arrowhead.autonomic.orchestrator.manager.plan.model;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("SubstitutionAdaptation")
 public class SubstitutionAdaptation extends Adaptation{
 	
 	
-	private String FromService;
-	private String FromProducer;
-	private String ToService;
-	private String ToProducer;
+	private String fromService;
+	private String fromProducer;
+	private String toService;
+	private String toProducer;
+	
 	
 	public SubstitutionAdaptation()
 	{
 		super();
-		type = "Substitution";
+		type = AdaptationType.SubstitutionAdaptation;
 	}
 
+
+	
 	public String getFromService() {
-		return FromService;
+		return fromService;
 	}
+
+
 
 	public void setFromService(String fromService) {
-		FromService = fromService;
+		this.fromService = fromService;
 	}
+
+
 
 	public String getFromProducer() {
-		return FromProducer;
+		return fromProducer;
 	}
+
+
 
 	public void setFromProducer(String fromProducer) {
-		FromProducer = fromProducer;
+		this.fromProducer = fromProducer;
 	}
+
+
 
 	public String getToService() {
-		return ToService;
+		return toService;
 	}
+
+
 
 	public void setToService(String toService) {
-		ToService = toService;
+		this.toService = toService;
 	}
+
+
 
 	public String getToProducer() {
-		return ToProducer;
+		return toProducer;
 	}
 
+
+
 	public void setToProducer(String toProducer) {
-		ToProducer = toProducer;
+		this.toProducer = toProducer;
 	}
-	
+
+
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((FromProducer == null) ? 0 : FromProducer.hashCode());
-		result = prime * result + ((FromService == null) ? 0 : FromService.hashCode());
-		result = prime * result + ((ToProducer == null) ? 0 : ToProducer.hashCode());
-		result = prime * result + ((ToService == null) ? 0 : ToService.hashCode());
+		result = prime * result + ((fromProducer == null) ? 0 : fromProducer.hashCode());
+		result = prime * result + ((fromService == null) ? 0 : fromService.hashCode());
+		result = prime * result + ((toProducer == null) ? 0 : toProducer.hashCode());
+		result = prime * result + ((toService == null) ? 0 : toService.hashCode());
 		return result;
 	}
 
@@ -68,33 +90,33 @@ public class SubstitutionAdaptation extends Adaptation{
 		if (getClass() != obj.getClass())
 			return false;
 		SubstitutionAdaptation other = (SubstitutionAdaptation) obj;
-		if (FromProducer == null) {
-			if (other.FromProducer != null)
+		if (fromProducer == null) {
+			if (other.fromProducer != null)
 				return false;
-		} else if (!FromProducer.equals(other.FromProducer))
+		} else if (!fromProducer.equals(other.fromProducer))
 			return false;
-		if (FromService == null) {
-			if (other.FromService != null)
+		if (fromService == null) {
+			if (other.fromService != null)
 				return false;
-		} else if (!FromService.equals(other.FromService))
+		} else if (!fromService.equals(other.fromService))
 			return false;
-		if (ToProducer == null) {
-			if (other.ToProducer != null)
+		if (toProducer == null) {
+			if (other.toProducer != null)
 				return false;
-		} else if (!ToProducer.equals(other.ToProducer))
+		} else if (!toProducer.equals(other.toProducer))
 			return false;
-		if (ToService == null) {
-			if (other.ToService != null)
+		if (toService == null) {
+			if (other.toService != null)
 				return false;
-		} else if (!ToService.equals(other.ToService))
+		} else if (!toService.equals(other.toService))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "SubstitutionAdaptation [FromService=" + FromService + ", FromProducer=" + FromProducer + ", ToService="
-				+ ToService + ", ToProducer=" + ToProducer + ", type=" + type + "]";
+		return "SubstitutionAdaptation [fromService=" + fromService + ", fromProducer=" + fromProducer + ", toService="
+				+ toService + ", toProducer=" + toProducer + ", type=" + type + ", status=" + status + "]";
 	}
 	
 	

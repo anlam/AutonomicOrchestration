@@ -59,6 +59,8 @@ public class Plan {
 	public void UpdateAdaptationPlan(String name, Adaptation adapt)
 	{
 		updatePlanLock.lock();
+		
+		
 		try
 		{
 			AdaptationPlan adaptationPlan = ConsumerAdaptationPlansTreeMap.get(name);
@@ -70,8 +72,31 @@ public class Plan {
 				
 				if(adapt.getStatus() ==  PlanStatus.NEW)
 					adaptationPlan.setStatus(PlanStatus.NEW);
+				
+				log.debug("Plan Updated Adaptation: " + adaptationPlan);
+				System.out.println("Plan Updated Adaptation: " + adaptationPlan);
 			}
 			ConsumerAdaptationPlansTreeMap.put(name, adaptationPlan);
+			
+			
+		}
+		finally {
+			updatePlanLock.unlock();
+		}
+		
+		
+	}
+	
+	public void UpdateAdaptationPlanStatus(String name, PlanStatus status)
+	{
+		updatePlanLock.lock();
+		try
+		{
+			AdaptationPlan adaptationPlan = ConsumerAdaptationPlansTreeMap.get(name);
+			if(adaptationPlan != null)
+				adaptationPlan.setStatus(status);
+			
+			//ConsumerAdaptationPlansTreeMap.put(name, adaptationPlan);
 		}
 		finally {
 			updatePlanLock.unlock();
@@ -98,6 +123,27 @@ public class Plan {
 		}
 		
 		return ret;
+	}
+	
+	public void RemoveAllAdaptations(String name)
+	{
+		updatePlanLock.lock();
+		
+		try
+		{
+			if(ConsumerAdaptationPlansTreeMap.containsKey(name))
+			{
+				AdaptationPlan plan = ConsumerAdaptationPlansTreeMap.get(name);
+				plan.getAdaptations().clear();
+				
+				log.debug("Plan RemoveAllAdaptations: " + plan);
+				System.out.println("Plan RemoveAllAdaptations: " + plan);
+			}
+		}
+		finally 
+		{
+			updatePlanLock.unlock();
+		}
 	}
 	
 	public void RemoveAdaptationPlans(String name, List<Adaptation> adapts)
@@ -138,11 +184,6 @@ public class Plan {
 		planWorker.stop();
 	}
 	
-	public void ProcessExecutedAdaptationPlan(String consumerName, List<Adaptation> executedAdapts)
-	{
-		
-	}
-	
 	public void WorkerProcess() {
 		UpdateRules();
 		StartReasoning();
@@ -151,7 +192,7 @@ public class Plan {
 	private void StartReasoning()
 	{
 		log.debug("Planning Reasoning Rules");
-		System.out.println("Planning Reasoning Rules");
+		//System.out.println("Planning Reasoning Rules");
 		
 		List<Rule> rules = new ArrayList<Rule>();
 		for(List<Rule> rls : ConsumerRulesTreeMap.values())
@@ -227,8 +268,8 @@ public class Plan {
 				ConsumerRulesTreeMap.put(name, modifiedRules);
 				ruleLastUpdated.put(name, f.lastModified());
 				
-				log.debug("New query registered for consumer: " + name);
-				System.out.println("New query registered for consumer: " + name);
+				log.debug("Plan: New rule registered for consumer: " + name);
+				System.out.println("Plan: New rule registered for consumer: " + name);
 				
 				
 			}

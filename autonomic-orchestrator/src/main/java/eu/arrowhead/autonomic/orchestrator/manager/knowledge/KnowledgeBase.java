@@ -61,7 +61,7 @@ public class KnowledgeBase {
 				 
 				 + "insert data { "
 				
-				 + ":PrediktorAutoOrchPush :hasServiceDefinition \"AutonomicOrchestrationPush\" . \n"
+				 + ":PrediktorApisServer :consumesService :Service_3244631 . \n"
 				
 				 + "}";
 		
@@ -102,9 +102,9 @@ public class KnowledgeBase {
 		}
 		catch(Exception e)
 		{
-			log.debug("Fail to add statement: " + e.getMessage());
-			System.out.println("Fail to add statement: " + e.getMessage());
-			e.printStackTrace();
+			log.error("Fail to add statement: " + e.getMessage());
+			System.err.println("Fail to add statement: " + e.getMessage());
+			//e.printStackTrace();
 		}
 		finally {
 			dataset.end();
@@ -128,7 +128,9 @@ public class KnowledgeBase {
 
 			dataset.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("Fail to WriteModelToFile: " + e.getMessage());
+			System.err.println("Fail to WriteModelToFile: " + e.getMessage());
+			//e.printStackTrace();
 		} finally {
 			dataset.end();
 
@@ -140,7 +142,7 @@ public class KnowledgeBase {
 		lock.lock();
 		List<QuerySolution> ret = new ArrayList<QuerySolution>();
 		log.debug("Knowledgebase Executing Select query");
-		System.out.println("Knowledgebase Executing Select query");
+		//System.out.println("Knowledgebase Executing Select query");
 
 		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
 		dataset.begin(ReadWrite.READ);
@@ -160,7 +162,7 @@ public class KnowledgeBase {
 			}
 
 		} catch (Exception e) {
-			log.debug("Fail to execute query: " + e.getMessage());
+			log.error("Fail to execute query: " + e.getMessage());
 			System.err.println("Fail to execute query: " + e.getMessage());
 			// e.printStackTrace();
 		} finally {
@@ -177,7 +179,7 @@ public class KnowledgeBase {
 		//AddService(serviceName);
 		
 		log.debug("Knowledgebase Executing Update queries" );
-		System.out.println("Knowledgebase Executing Update queries");
+		//System.out.println("Knowledgebase Executing Update queries");
 		
 		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
 		dataset.begin(ReadWrite.WRITE);
@@ -208,9 +210,9 @@ public class KnowledgeBase {
 		}
 		catch(Exception e)
 		{
-			log.debug("Fail to execute query: " + e.getMessage());
+			log.error("Fail to execute query: " + e.getMessage());
 			System.err.println("Fail to execute query: " + e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		finally {
 			dataset.end();
@@ -222,7 +224,7 @@ public class KnowledgeBase {
 	{
 		lock.lock();
 		log.debug("Knowledgebase Reasoning Rules");
-		System.out.println("Knowledgebase Reasoning Rules");
+		//System.out.println("Knowledgebase Reasoning Rules");
 		
 		
 		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
@@ -247,9 +249,9 @@ public class KnowledgeBase {
 		}
 		catch(Exception e)
 		{
-			log.debug("Fail to reason rules: " + e.getMessage());
+			log.error("Fail to reason rules: " + e.getMessage());
 			System.err.println("Fail to reason rules:  " + e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		finally {
 			dataset.end();
@@ -261,8 +263,8 @@ public class KnowledgeBase {
 	{
 		lock.lock();
 		
-		log.debug("Knowledgebase Adding observation" );
-		System.out.println("Knowledgebase Adding observation");
+		log.debug(String.format("Knowledgebase Adding observation %s, %s, %d, %s", observationId, sensorId, timestamp, value));
+		//System.out.println(String.format("Knowledgebase Adding observation %s, %s, %d, %s", observationId, sensorId, timestamp, value));
 		
 		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
 		dataset.begin(ReadWrite.WRITE);
@@ -275,8 +277,8 @@ public class KnowledgeBase {
 								 "prefix rdfs: <"+RDFS.getURI()+">\n" +
 								 "prefix rdf: <"+RDF.getURI()+">\n" +
 								 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
-								 "select ?obs \n" +
-								 "where { ?obs rdf:type sosa:Observation . \n" +
+								 //"select ?obs \n" +
+								 "ask { ?obs rdf:type sosa:Observation . \n" +
 								 "?obs sosa:madeBySensor :"  + sensorId + " . \n" +
 								 "}";
 			
@@ -310,20 +312,9 @@ public class KnowledgeBase {
 			//System.out.println(addString);
 			
 			Query query = QueryFactory.create(queryString);
-		  try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
-			    ResultSet results = qexec.execSelect() ;
-			    for ( ; results.hasNext() ; )
-			    {
-			      QuerySolution soln = results.nextSolution() ;
-			      
-			     // System.out.println(soln);
-			      if(soln.toString().contains(observationId))
-			      {
-			    	  isObservationExisted = true;
-			    	  break;
-			      }
-			    }
-			  }
+		    QueryExecution qexec = QueryExecutionFactory.create(query, model);
+			isObservationExisted = qexec.execAsk();
+			  
 		  
 		  if(isObservationExisted)
 			  UpdateAction.parseExecute(updateString, model);
@@ -338,7 +329,9 @@ public class KnowledgeBase {
 		} 
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			log.error("Fail to AddObservation: " + e.getMessage());
+			System.err.println("Fail to AddObservation:  " + e.getMessage());
+			//e.printStackTrace();
 		}
 		finally {
 			dataset.end();
@@ -377,7 +370,7 @@ public class KnowledgeBase {
 		} 
 		catch(Exception e)
 		{
-			log.debug("Fail to add sensor: " + e.getMessage());
+			log.error("Fail to add sensor: " + e.getMessage());
 			System.err.println("Fail to add sensor: " + e.getMessage());
 			e.printStackTrace();
 		}
@@ -417,7 +410,7 @@ public class KnowledgeBase {
 		}
 		catch(Exception e)
 		{
-			log.debug("Fail to add service: " + e.getMessage());
+			log.error("Fail to add service: " + e.getMessage());
 			System.err.println("Fail to add service: " + e.getMessage());
 			e.printStackTrace();
 		}

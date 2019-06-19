@@ -6,7 +6,11 @@ import java.util.List;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.Plan;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.Adaptation;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.AdaptationPlan;
+import eu.arrowhead.autonomic.orchestrator.manager.plan.model.AdaptationType;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.PlanStatus;
+import eu.arrowhead.autonomic.orchestrator.manager.plan.model.SubstitutionAdaptation;
+import eu.arrowhead.autonomic.orchestrator.push.AutonomicOrchestrationPushConsumerREST_WS;
+import eu.arrowhead.autonomic.orchestrator.push.AutonomicOrchestrationPushService;
 
 public class OrchestrationPushWorker implements Runnable {
 
@@ -36,28 +40,34 @@ public class OrchestrationPushWorker implements Runnable {
 	}
 
 	public void run() {
-		
+
 		System.out.println("OrchestrationPushWorker Sending orchestratin to: " + consumerName);
-		AutonomicOrchestrationPushService pushService = new AutonomicOrchestrationPushConsumerREST_WS(consumerName, consumerURL);
+		AutonomicOrchestrationPushService pushService = new AutonomicOrchestrationPushConsumerREST_WS(consumerName,
+				consumerURL);
+		plan.UpdateAdaptationPlanStatus(consumerName, PlanStatus.SENDING);
+
 		AdaptationPlan response = pushService.sendApdationPlan(adaptationPlan);
-		if(response != null)
-		{
+		if (response != null) {
+			System.out.println("OrchestrationPushWorker get response: " + response);
 			List<Adaptation> executedAdapts = new ArrayList<Adaptation>();
-			for(Adaptation adapt : response.getAdaptations())
-			{
-				if(adapt.getStatus() == PlanStatus.EXECUTED)
+			for (Adaptation adapt : response.getAdaptations()) {
+
+				if (adapt.getStatus() == PlanStatus.EXECUTED) {
+
 					executedAdapts.add(adapt);
+				}
+
 			}
-			
-			for(Adaptation adapt : plan.GetAdaptationPlan(consumerName).getAdaptations())
-			{
+
+			for (Adaptation adapt : plan.GetAdaptationPlan(consumerName).getAdaptations()) {
 				adapt.setStatus(PlanStatus.SENT);
-				if(executedAdapts.contains(adapt))
-					adapt.setStatus(PlanStatus.EXECUTED);			
+				if (executedAdapts.contains(adapt))
+					adapt.setStatus(PlanStatus.EXECUTED);
 			}
-			
-			plan.ProcessExecutedAdaptationPlan(consumerName, executedAdapts);
-			
+
+			execute.ProcessExecutedAdaptationPlan(consumerName, executedAdapts);
+		} else {
+			plan.UpdateAdaptationPlanStatus(consumerName, PlanStatus.NEW);
 		}
 	}
 		

@@ -10,6 +10,13 @@ public class AdaptationPlan implements Cloneable {
 	private PlanStatus status;
 	private List<Adaptation> adaptations;
 	
+	
+	public AdaptationPlan()
+	{
+		
+	}
+	
+	
 	public AdaptationPlan(String systemName)
 	{
 		this.systemName = systemName;
@@ -49,7 +56,12 @@ public class AdaptationPlan implements Cloneable {
 		this.adaptations = adaptations;
 	}
 
+	@Override
+	public String toString() {
+		return "AdaptationPlan [systemName=" + systemName + ", status=" + status + ", adaptations=" + adaptations + "]";
+	}
 
+	
 	
 	
 	

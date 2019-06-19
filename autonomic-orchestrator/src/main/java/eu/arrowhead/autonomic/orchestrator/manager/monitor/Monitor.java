@@ -114,7 +114,7 @@ public class Monitor {
 	public void AddObservation(String observationId, String sensorId, long timestamp, String value) 
 	{
 		log.debug("Monitor Updating Observation: " + observationId);
-		System.out.println("Monitor Updating Observation: " + observationId);
+		//System.out.println("Monitor Updating Observation: " + observationId);
 		
 	    KnowledgeBase.getInstance().AddObservation(observationId, sensorId, timestamp, value);
 	}

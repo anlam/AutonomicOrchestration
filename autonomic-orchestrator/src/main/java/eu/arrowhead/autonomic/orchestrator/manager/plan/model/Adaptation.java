@@ -1,9 +1,20 @@
 package eu.arrowhead.autonomic.orchestrator.manager.plan.model;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+
+@JsonTypeInfo(
+	      use = JsonTypeInfo.Id.NAME, 
+	      include = As.PROPERTY, 
+	      property = "type")
+	    @JsonSubTypes({
+	        @JsonSubTypes.Type(value = SubstitutionAdaptation.class, name = "SubstitutionAdaptation"),
+	    })
 public class Adaptation {
 	
 	
-	protected String type;
+	protected AdaptationType type;
 	protected PlanStatus status;
 	
 	public Adaptation()
@@ -13,10 +24,10 @@ public class Adaptation {
 	
 	
 	
-	public String getType() {
+	public AdaptationType getType() {
 		return type;
 	}
-	public void setType(String type) {
+	public void setType(AdaptationType type) {
 		this.type = type;
 	}
 	
@@ -56,6 +67,14 @@ public class Adaptation {
 			return false;
 		return true;
 	}
+
+
+
+	@Override
+	public String toString() {
+		return "Adaptation [type=" + type + ", status=" + status + "]";
+	}
+	
 	
 
 }

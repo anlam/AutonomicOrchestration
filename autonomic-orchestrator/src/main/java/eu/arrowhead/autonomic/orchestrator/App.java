@@ -22,10 +22,10 @@ public class App
     	
 		Monitor monitor = new Monitor();
 		
-		//DemoConsumer demo1 = new DemoConsumer("3244631");
-		//DemoConsumer demo2 = new DemoConsumer("2999285");
-		//monitor.AddConsumer(demo1);
-		//monitor.AddConsumer(demo2);
+		DemoConsumer demo1 = new DemoConsumer("3244631");
+		DemoConsumer demo2 = new DemoConsumer("2999285");
+		monitor.AddConsumer(demo1);
+		monitor.AddConsumer(demo2);
 		
 		
 		Analysis analysis = new Analysis();

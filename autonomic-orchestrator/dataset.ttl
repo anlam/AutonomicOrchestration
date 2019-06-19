@@ -39,9 +39,9 @@ sosa:Observation  a  rdfs:Class .
 
 :Observation_3244631  a            sosa:Observation ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "8888"^^xsd:double ;
+        sosa:hasSimpleResult       "2000"^^xsd:double ;
         sosa:madeBySensor          :Device_3244631 ;
-        sosa:resultTime            1560768290813 .
+        sosa:resultTime            1560955667545 .
 
 :Device_3244631  a        :SensorUnit ;
         :hasID            "3244631" ;
@@ -50,9 +50,9 @@ sosa:Observation  a  rdfs:Class .
 
 :Observation_2999285  a            sosa:Observation ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "1000"^^xsd:double ;
+        sosa:hasSimpleResult       "200"^^xsd:double ;
         sosa:madeBySensor          :Device_2999285 ;
-        sosa:resultTime            1560772584438 .
+        sosa:resultTime            1560955246609 .
 
 :ServiceState  a  rdfs:Class .
 
@@ -60,7 +60,7 @@ sosa:Observation  a  rdfs:Class .
 
 :OnlineState  a  :ServiceState .
 
-:DateTimeNow  :hasValue  1560870495967 .
+:DateTimeNow  :hasValue  1560956250106 .
 
 sosa:FeatureOfInterest
         a       rdfs:Class .

@@ -44,7 +44,7 @@ public class Analysis {
 		
 		
 		log.debug("Analysis executing queries");
-		System.out.println("Analysis executing queris");
+		//System.out.println("Analysis executing queris");
 		
 		
 		KnowledgeBase.getInstance().ExecuteUpdateQueries(new ArrayList<String>(queries.values()));
@@ -89,9 +89,10 @@ public class Analysis {
 				
 				String query =  readFile(f.getAbsolutePath());
 				queries.put(name, query);
+				queryLastUpdated.put(name, f.lastModified());
 				
-				log.debug("New query registered: " + name);
-				System.out.println("New query registered: " + name);
+				log.debug("Analysis: New query registered: " + name);
+				System.out.println("Analysis: New query registered: " + name);
 				
 				
 			}
