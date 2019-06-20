@@ -5,5 +5,8 @@ public enum PlanStatus
 	NEW,
 	SENDING,
 	SENT,
-	EXECUTED
+	EXECUTING,
+	EXECUTED,
+	IGNORED,
+	FAILED
 }

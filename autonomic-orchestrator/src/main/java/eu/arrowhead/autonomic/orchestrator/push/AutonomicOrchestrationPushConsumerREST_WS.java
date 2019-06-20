@@ -31,7 +31,9 @@ public class AutonomicOrchestrationPushConsumerREST_WS implements AutonomicOrche
 			System.out.println(sValue);
 			Response getResponse = Utility.sendRequest(updateURL, "PUT", sValue);
 
-			if (getResponse.getStatus() != 200) {
+			int status = getResponse.getStatus();
+			int a = status;
+			if (getResponse.getStatus() == 200) {
 				response = new  ObjectMapper().readValue(getResponse.readEntity(String.class),  AdaptationPlan.class);
 				//response = gson.fromJson(getResponse.readEntity(String.class), AdaptationPlan.class);
 			}

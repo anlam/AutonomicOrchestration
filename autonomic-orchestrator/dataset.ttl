@@ -24,7 +24,7 @@
 
 :Service_3244631  a  :Service ;
         :hasID     "3244631" ;
-        :hasState  :OfflineState .
+        :hasState  :OnlineState .
 
 :Device_2999285  a        :SensorUnit ;
         :hasID            "2999285" ;
@@ -33,7 +33,7 @@
 
 :Service_2999285  a  :Service ;
         :hasID     "2999285" ;
-        :hasState  :OfflineState .
+        :hasState  :OnlineState .
 
 sosa:Observation  a  rdfs:Class .
 
@@ -41,7 +41,7 @@ sosa:Observation  a  rdfs:Class .
         sosa:hasFeatureOfInterest  :Temperature ;
         sosa:hasSimpleResult       "2000"^^xsd:double ;
         sosa:madeBySensor          :Device_3244631 ;
-        sosa:resultTime            1560955667545 .
+        sosa:resultTime            1561032849114 .
 
 :Device_3244631  a        :SensorUnit ;
         :hasID            "3244631" ;
@@ -50,9 +50,9 @@ sosa:Observation  a  rdfs:Class .
 
 :Observation_2999285  a            sosa:Observation ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "200"^^xsd:double ;
+        sosa:hasSimpleResult       "3000"^^xsd:double ;
         sosa:madeBySensor          :Device_2999285 ;
-        sosa:resultTime            1560955246609 .
+        sosa:resultTime            1561032856791 .
 
 :ServiceState  a  rdfs:Class .
 
@@ -60,7 +60,7 @@ sosa:Observation  a  rdfs:Class .
 
 :OnlineState  a  :ServiceState .
 
-:DateTimeNow  :hasValue  1560956250106 .
+:DateTimeNow  :hasValue  1561032896915 .
 
 sosa:FeatureOfInterest
         a       rdfs:Class .
@@ -83,4 +83,4 @@ sosa:FeatureOfInterest
         :hasServiceDefinition  "AutonomicOrchestrationPush" .
 
 :PrediktorAutoOrchOper
-        :hasAddress  "http://localhost:6969/orchestration/auto" .
+        :hasAddress  "http://localhost:6565/pull/orchestration/auto" .

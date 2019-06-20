@@ -64,7 +64,7 @@ public class OrchestrationPushResource {
 		System.out.println("Sending response: ");
 		System.out.println(sValue);
 		
-		return Response.status(Status.ACCEPTED).entity(sValue).build();
+		return Response.status(Status.OK).entity(sValue).build();
 	}
 
 }

@@ -59,9 +59,23 @@ public class KnowledgeBase {
 				 "prefix xsd: <"+XSD.getURI()+">\n" 
 				
 				 
+				 + "delete data { "
+				
+				 + ":PrediktorAutoOrchOper :hasAddress \"http://localhost:6969/orchestration/auto\" . \n"
+				
+				 + "}";
+		
+		
+		String updateCurentTimeQuery2 = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
+				 "prefix rdfs: <"+RDFS.getURI()+">\n" +
+				 "prefix rdf: <"+RDF.getURI()+">\n" +
+				 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
+				 "prefix xsd: <"+XSD.getURI()+">\n" 
+				
+				 
 				 + "insert data { "
 				
-				 + ":PrediktorApisServer :consumesService :Service_3244631 . \n"
+				 + ":PrediktorAutoOrchOper :hasAddress \"http://localhost:6565/pull/orchestration/auto\" . \n"
 				
 				 + "}";
 		
@@ -69,6 +83,7 @@ public class KnowledgeBase {
 		
 		List<String> queries = new ArrayList<String>();
 		queries.add(updateCurentTimeQuery);
+		queries.add(updateCurentTimeQuery2);
 		//queries.add(offlineString);
 		//queries.add(onlineString);
 		KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);
@@ -359,7 +374,7 @@ public class KnowledgeBase {
 					 "prefix xsd: <"+XSD.getURI()+">\n" +
 					 "insert data{ "   +
 					 ":" + sensorName + " rdf:type :SensorUnit . \n" + 
-					 //":" + sensorName + " :hasID :" + sensorId + " . \n" + 
+					 ":" + sensorName + " :hasID \"" + sensorName + "\" . \n" + 
 					 ":" + sensorName + " :hasService :" + serviceName + " . \n" + 
 					 "}";
 			
@@ -400,7 +415,7 @@ public class KnowledgeBase {
 					 "prefix xsd: <"+XSD.getURI()+">\n" +
 					 "insert data{ "   +
 					 ":" + serviceName + " rdf:type :Service . \n" + 
-					 //":" + serviceName + " :hasID :" + serviceId + " . \n" + 
+					 ":" + serviceName + " :hasID \"" + serviceName + "\" . \n" + 
 					 "}";
 			
 			UpdateAction.parseExecute(addString, model);

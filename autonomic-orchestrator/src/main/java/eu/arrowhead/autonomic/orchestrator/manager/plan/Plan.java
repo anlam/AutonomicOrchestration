@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.ReadWrite;
@@ -157,6 +158,9 @@ public class Plan {
 			{
 				AdaptationPlan plan = ConsumerAdaptationPlansTreeMap.get(name);
 				plan.getAdaptations().removeAll(adapts);
+				
+				log.debug("Plan RemoveAdaptationPlans: " + plan);
+				System.out.println("Plan RemoveAdaptationPlans: " + plan);
 			}
 		}
 		finally 
@@ -254,7 +258,8 @@ public class Plan {
 				
 				
 				
-				
+				log.debug("Plan: New rule registered for consumer: " + name);
+				System.out.println("Plan: New rule registered for consumer: " + name);
 				
 				List<Rule> modifiedRules = new ArrayList<Rule>();
 				
@@ -263,13 +268,14 @@ public class Plan {
 				{
 					Rule newRule = new Rule(name + "_rule" + i , r.getHead(), r.getBody());
 					modifiedRules.add(newRule);
+					System.out.println(newRule);
 				}
 					
 				ConsumerRulesTreeMap.put(name, modifiedRules);
 				ruleLastUpdated.put(name, f.lastModified());
 				
-				log.debug("Plan: New rule registered for consumer: " + name);
-				System.out.println("Plan: New rule registered for consumer: " + name);
+				
+				//for(Rule r : rules)
 				
 				
 			}

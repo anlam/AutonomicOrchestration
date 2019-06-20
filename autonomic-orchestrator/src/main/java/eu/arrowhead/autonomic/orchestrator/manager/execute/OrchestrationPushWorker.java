@@ -47,27 +47,30 @@ public class OrchestrationPushWorker implements Runnable {
 		plan.UpdateAdaptationPlanStatus(consumerName, PlanStatus.SENDING);
 
 		AdaptationPlan response = pushService.sendApdationPlan(adaptationPlan);
-		if (response != null) {
+		if (response != null) 
+		{
+			plan.UpdateAdaptationPlanStatus(consumerName, PlanStatus.SENT);
 			System.out.println("OrchestrationPushWorker get response: " + response);
-			List<Adaptation> executedAdapts = new ArrayList<Adaptation>();
-			for (Adaptation adapt : response.getAdaptations()) {
+			/*
+			 * List<Adaptation> executedAdapts = new ArrayList<Adaptation>(); for
+			 * (Adaptation adapt : response.getAdaptations()) {
+			 * 
+			 * if (adapt.getStatus() == PlanStatus.EXECUTED) {
+			 * 
+			 * executedAdapts.add(adapt); }
+			 * 
+			 * }
+			 * 
+			 * for (Adaptation adapt :
+			 * plan.GetAdaptationPlan(consumerName).getAdaptations()) {
+			 * adapt.setStatus(PlanStatus.SENT); if (executedAdapts.contains(adapt))
+			 * adapt.setStatus(PlanStatus.EXECUTED); }
+			 */
 
-				if (adapt.getStatus() == PlanStatus.EXECUTED) {
-
-					executedAdapts.add(adapt);
-				}
-
-			}
-
-			for (Adaptation adapt : plan.GetAdaptationPlan(consumerName).getAdaptations()) {
-				adapt.setStatus(PlanStatus.SENT);
-				if (executedAdapts.contains(adapt))
-					adapt.setStatus(PlanStatus.EXECUTED);
-			}
-
-			execute.ProcessExecutedAdaptationPlan(consumerName, executedAdapts);
+			execute.ProcessExecutedAdaptationPlan(consumerName, response);
 		} else {
-			plan.UpdateAdaptationPlanStatus(consumerName, PlanStatus.NEW);
+			plan.UpdateAdaptationPlanStatus(consumerName, PlanStatus.FAILED);
+			System.err.println(String.format("Fail to send to %s, %s", consumerName,  adaptationPlan));
 		}
 	}
 		

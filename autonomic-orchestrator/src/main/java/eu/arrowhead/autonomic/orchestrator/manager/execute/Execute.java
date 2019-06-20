@@ -127,26 +127,55 @@ public class Execute {
 		executeWorker.stop();
 	}
 
-	public void ProcessExecutedAdaptationPlan(String consumerName, List<Adaptation> executedAdapts) {
-		for(Adaptation adapt : executedAdapts)
+	public void ProcessExecutedAdaptationPlan(String consumerName, AdaptationPlan adaptationPlan) {
+		
+		
+		List<Adaptation> executedAdapts = new ArrayList<Adaptation>();
+
+		List<Adaptation> currentAdapts = plan.GetAdaptationPlan(consumerName).getAdaptations();
+		for (Adaptation adapt : adaptationPlan.getAdaptations()) {
+			if (adapt.getStatus() == PlanStatus.EXECUTED) {
+				executedAdapts.add(adapt);
+			}
+			
+			for(Adaptation cAdapt : currentAdapts)
+				if(cAdapt.equals(adapt))
+					cAdapt.setStatus(adapt.getStatus());
+			
+		}
+
+		/*
+		 * for (Adaptation adapt :
+		 * plan.GetAdaptationPlan(consumerName).getAdaptations()) {
+		 * adapt.setStatus(PlanStatus.SENT); if (executedAdapts.contains(adapt))
+		 * adapt.setStatus(PlanStatus.EXECUTED); }
+		 */
+
+		if(!executedAdapts.isEmpty())
 		{
-			if(adapt.getStatus() ==  PlanStatus.EXECUTED)
-			{
-				if(adapt instanceof SubstitutionAdaptation)
-				{
-					SubstitutionAdaptation substitutionAdaptation = (SubstitutionAdaptation) adapt;
-					updateKnowledgeBaseWithExecutedSubstitution(consumerName, substitutionAdaptation);
+			for (Adaptation adapt : executedAdapts) {
+				if (adapt.getStatus() == PlanStatus.EXECUTED) {
+					if (adapt instanceof SubstitutionAdaptation) {
+						SubstitutionAdaptation substitutionAdaptation = (SubstitutionAdaptation) adapt;
+						updateKnowledgeBaseWithExecutedSubstitution(consumerName, substitutionAdaptation);
+						
+					}
 				}
 			}
+			
+
+			plan.RemoveAdaptationPlans(consumerName, executedAdapts);
+			plan.UpdateAdaptationPlanStatus(consumerName, PlanStatus.EXECUTED);
+			
 		}
 		
-		log.debug("Execute: ProcessExecutedAdaptationPlan for " +consumerName );
-		System.out.println("Execute: ProcessExecutedAdaptationPlan for " +consumerName );
+		log.debug("Execute: ProcessExecutedAdaptationPlan for " + consumerName);
+		System.out.println("Execute: ProcessExecutedAdaptationPlan for " + consumerName);
+		System.out.println(plan.GetAdaptationPlan(consumerName));
+
+
 		
-		plan.RemoveAllAdaptations(consumerName);
-		plan.UpdateAdaptationPlanStatus(consumerName, PlanStatus.EXECUTED);
-		
-		
+
 	}
 	
 	private void updateKnowledgeBaseWithExecutedSubstitution(String consumerName, SubstitutionAdaptation substitutionAdaptation)
