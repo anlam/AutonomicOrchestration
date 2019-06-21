@@ -111,12 +111,12 @@ public class Monitor {
 	
 	
 	
-	public void AddObservation(String observationId, String sensorId, long timestamp, String value) 
+	public void AddObservation(String observationId, String sensorId, long timestamp, String value, String featureOfInterest) 
 	{
 		log.debug("Monitor Updating Observation: " + observationId);
 		//System.out.println("Monitor Updating Observation: " + observationId);
 		
-	    KnowledgeBase.getInstance().AddObservation(observationId, sensorId, timestamp, value);
+	    KnowledgeBase.getInstance().AddObservation(observationId, sensorId, timestamp, value, featureOfInterest);
 	}
 	
 	public static void main4(String[] args) throws FileNotFoundException {

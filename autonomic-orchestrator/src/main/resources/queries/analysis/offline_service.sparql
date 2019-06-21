@@ -13,5 +13,5 @@ where { ?sensor rdf:type :SensorUnit .
 ?observation sosa:resultTime ?time . 
 ?service :hasState :OnlineState . 
 :DateTimeNow :hasValue ?now . 
-filter(?time < ?now - 300000) . 
+filter(?time < ?now - 30000) . 
 }

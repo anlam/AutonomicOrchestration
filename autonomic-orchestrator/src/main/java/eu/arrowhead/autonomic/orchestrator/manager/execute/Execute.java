@@ -110,7 +110,7 @@ public class Execute {
 	      String addressString = address.getString();
 	      
 	      log.debug("Execute found orchestration push endpoint for " + consumerName + "at: " + addressString);
-	     // System.out.println("Execute found orchestration push endpoint for " + consumerName + "at: " + addressString);
+	      //System.out.println("Execute found orchestration push endpoint for " + consumerName + "at: " + addressString);
 	      //System.out.println(addressString);
 	      consumerOrchestrationPushEndpointTreeMap.put(consumerName, addressString);
 	     

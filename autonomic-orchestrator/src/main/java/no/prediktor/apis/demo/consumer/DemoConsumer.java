@@ -66,6 +66,7 @@ public class DemoConsumer extends BaseConsumerWorker {
     //Compile the payload, that needs to be sent to the Orchestrator - THIS METHOD SHOULD BE MODIFIED ACCORDING TO YOUR NEEDS
     ServiceRequestForm srf = compileSRF();
 
+    System.out.println(srf);
     //Sending the orchestration request and parsing the response
     String providerUrl = sendOrchestrationRequest(srf);
 
@@ -117,7 +118,7 @@ public class DemoConsumer extends BaseConsumerWorker {
      */
     
     String serviceName = props.getProperty("apis_service_name");
-    ArrowheadService service = new ArrowheadService(serviceName, Collections.singleton("JSON"), metadata);
+    ArrowheadService service = new ArrowheadService(serviceName, Collections.singleton("json"), metadata);
 
     //Some of the orchestrationFlags the consumer can use, to influence the orchestration process
     Map<String, Boolean> orchestrationFlags = new HashMap<>();
@@ -178,7 +179,7 @@ public class DemoConsumer extends BaseConsumerWorker {
 		  {
 			  if(item.getName().contains(DeviceID + ".temperature"))
 			  {
-				  monitor.AddObservation("Observation_" + DeviceID, "Device_" + DeviceID, item.getVQT().getTimestamp().getTime(), item.getVQT().getValue());
+				  monitor.AddObservation("Observation_" + DeviceID, "Device_" + DeviceID, item.getVQT().getTimestamp().getTime(), item.getVQT().getValue(), "Temperature");
 			  }
 				 
 		  }

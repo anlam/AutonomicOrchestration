@@ -3,10 +3,10 @@ package eu.arrowhead.autonomic.orchestrator.manager.knowledge;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.jena.JenaRuntime;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -22,6 +22,7 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
+import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.update.UpdateAction;
 import org.apache.jena.vocabulary.RDF;
@@ -61,7 +62,7 @@ public class KnowledgeBase {
 				 
 				 + "delete data { "
 				
-				 + ":PrediktorAutoOrchOper :hasAddress \"http://localhost:6969/orchestration/auto\" . \n"
+				 + ":PrediktorApisServer :consumesService :Service_9575530. \n"
 				
 				 + "}";
 		
@@ -75,7 +76,7 @@ public class KnowledgeBase {
 				 
 				 + "insert data { "
 				
-				 + ":PrediktorAutoOrchOper :hasAddress \"http://localhost:6565/pull/orchestration/auto\" . \n"
+ 				+ ":PrediktorApisServer :consumesService :Service_2999285. \n"
 				
 				 + "}";
 		
@@ -89,6 +90,53 @@ public class KnowledgeBase {
 		KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);
 		KnowledgeBase.getInstance().WriteModelToFile("./dataset.ttl");
 		//KnowledgeBase.getInstance().ExecuteQuery(queries);
+
+	}
+	
+	public static void main2(String[] args) {
+		/*
+		 * String updateCurentTimeQuery = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
+		 * "prefix rdfs: <"+RDFS.getURI()+">\n" + "prefix rdf: <"+RDF.getURI()+">\n" +
+		 * "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
+		 * "prefix xsd: <"+XSD.getURI()+">\n" +
+		 * "delete { :DateTimeNow :hasValue ?Value} \n" +
+		 * "insert { :DateTimeNow :hasValue \"" + new Date().getTime() +
+		 * "\"^^xsd:long } \n" + "where {  :DateTimeNow :hasValue ?Value . \n" + "}";
+		 */
+		
+		KnowledgeBase.getInstance().AddSensor("Device_9575530", "Service_9575530", "TopMiddle", "TellUConnector");
+		KnowledgeBase.getInstance().WriteModelToFile("./dataset.ttl");
+		//KnowledgeBase.getInstance().ExecuteQuery(queries);
+
+	}
+	
+	public static void main1(String[] args) {
+		
+		String updateCurentTimeQuery = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
+				 "prefix rdfs: <"+RDFS.getURI()+">\n" +
+				 "prefix rdf: <"+RDF.getURI()+">\n" +
+				 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
+				 "prefix xsd: <"+XSD.getURI()+">\n" 
+				
+				 
+				 + "insert data { "
+				
+				+ ":TellUConnector :producesService  :Service_9575530 . \n" 
+				//+ ":Observation_9575530 sosa:hasFeatureOfInterest  :Temperature . \n" 
+				
+				 + "}";
+		
+		System.out.println(updateCurentTimeQuery);
+		
+		List<String> queries = new ArrayList<String>();
+		queries.add(updateCurentTimeQuery);
+		//queries.add(updateCurentTimeQuery2);
+		 
+		
+		//KnowledgeBase.getInstance().AddSensor("Device_9575530", "Service_9575530", "TopMiddle");
+		
+		KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);
+		KnowledgeBase.getInstance().WriteModelToFile("./dataset.ttl");
 
 	}
 	
@@ -166,6 +214,7 @@ public class KnowledgeBase {
 			Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
 
 			Query query = QueryFactory.create(queries);
+			//System.out.println(query);
 			QueryExecution qexec = QueryExecutionFactory.create(query, model);
 
 			ResultSet results = qexec.execSelect();
@@ -274,7 +323,7 @@ public class KnowledgeBase {
 		}
 	}
 	
-	public void AddObservation(String observationId, String sensorId, long timestamp, String value) 
+	public void AddObservation(String observationId, String sensorId, long timestamp, String value, String featureOfInterest) 
 	{
 		lock.lock();
 		
@@ -320,6 +369,7 @@ public class KnowledgeBase {
 					 "insert data { "   +
 					 ":" + observationId + " rdf:type sosa:Observation . \n" + 
 					 ":" + observationId + " sosa:madeBySensor :" + sensorId + " . \n" + 
+					 ":" + observationId + " sosa:hasFeatureOfInterest :" + featureOfInterest + " . \n" + 
 					 ":" + observationId + " sosa:hasSimpleResult \"" + value + "\"^^xsd:double . \n" + 
 					 ":" + observationId + " sosa:resultTime  \"" + timestamp + "\"^^xsd:long . \n" + 
 					 "}";
@@ -355,10 +405,10 @@ public class KnowledgeBase {
 
 	}
 	
-	public void AddSensor(String sensorName, String serviceName)
+	public void AddSensor(String sensorName, String serviceName, String location, String producer)
 	{
 		lock.lock();
-		AddService(serviceName);
+		AddService(serviceName, producer);
 		
 		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
 		dataset.begin(ReadWrite.WRITE);
@@ -374,8 +424,9 @@ public class KnowledgeBase {
 					 "prefix xsd: <"+XSD.getURI()+">\n" +
 					 "insert data{ "   +
 					 ":" + sensorName + " rdf:type :SensorUnit . \n" + 
-					 ":" + sensorName + " :hasID \"" + sensorName + "\" . \n" + 
+					 //":" + sensorName + " :hasID \"" + sensorName + "\" . \n" + 
 					 ":" + sensorName + " :hasService :" + serviceName + " . \n" + 
+					 ":" + sensorName + " sosa:hasLocation :" + location + " . \n" + 
 					 "}";
 			
 			UpdateAction.parseExecute(addString, model);
@@ -397,7 +448,7 @@ public class KnowledgeBase {
 	}
 	
 	
-	public void AddService(String serviceName)
+	public void AddService(String serviceName, String producer)
 	{
 		lock.lock();
 		
@@ -415,7 +466,8 @@ public class KnowledgeBase {
 					 "prefix xsd: <"+XSD.getURI()+">\n" +
 					 "insert data{ "   +
 					 ":" + serviceName + " rdf:type :Service . \n" + 
-					 ":" + serviceName + " :hasID \"" + serviceName + "\" . \n" + 
+					 ":" + producer + " :producesService :" + serviceName + " . \n" + 
+					 //":" + serviceName + " :hasID \"" + serviceName + "\" . \n" + 
 					 "}";
 			
 			UpdateAction.parseExecute(addString, model);
