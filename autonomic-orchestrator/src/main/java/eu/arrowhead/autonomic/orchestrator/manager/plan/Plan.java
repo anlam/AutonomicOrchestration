@@ -268,6 +268,7 @@ public class Plan {
 				{
 					Rule newRule = new Rule(name + "_rule" + i , r.getHead(), r.getBody());
 					modifiedRules.add(newRule);
+					i++;
 					System.out.println(newRule);
 				}
 					

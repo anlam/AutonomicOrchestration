@@ -9,3 +9,5 @@
 #[rule2: (?c rdf:type :Consumer) (?c :hasID "PrediktorApisServer") (?c :consumesService ?s1) (?p1 :producesService ?s1)(?s1 :hasID "2999285") (?p2 :producesService ?s2) (?s2 :hasID "3244631") -> substituteService(?c, ?s1, ?p1, ?s2, ?p2)]
 
 #[rule3: (:PrediktorApisServer  :consumesService :Service_9575530) -> substituteService(:PrediktorApisServer, :Service_9575530, :TellUConnector, :Service_2999285, :TellUConnector)]
+
+[rule4: (:Service_2999285  :hasState  :OnlineState)(:PrediktorApisServer  :consumesService ?s) notEqual(?s, :Service_2999285) -> substituteService(:PrediktorApisServer, ?s, :TellUConnector, :Service_2999285, :TellUConnector)]

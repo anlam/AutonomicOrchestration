@@ -42,7 +42,7 @@ public class KnowledgeBase {
 		lock =  new ReentrantLock();
 	}
 	
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		/*
 		 * String updateCurentTimeQuery = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
 		 * "prefix rdfs: <"+RDFS.getURI()+">\n" + "prefix rdf: <"+RDF.getURI()+">\n" +
@@ -93,7 +93,7 @@ public class KnowledgeBase {
 
 	}
 	
-	public static void main2(String[] args) {
+	public static void main(String[] args) {
 		/*
 		 * String updateCurentTimeQuery = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
 		 * "prefix rdfs: <"+RDFS.getURI()+">\n" + "prefix rdf: <"+RDF.getURI()+">\n" +
@@ -104,7 +104,7 @@ public class KnowledgeBase {
 		 * "\"^^xsd:long } \n" + "where {  :DateTimeNow :hasValue ?Value . \n" + "}";
 		 */
 		
-		KnowledgeBase.getInstance().AddSensor("Device_9575530", "Service_9575530", "TopMiddle", "TellUConnector");
+		KnowledgeBase.getInstance().AddSensor("Device_1199791", "Service_1199791", "TopMiddle", "TellUConnector");
 		KnowledgeBase.getInstance().WriteModelToFile("./dataset.ttl");
 		//KnowledgeBase.getInstance().ExecuteQuery(queries);
 
