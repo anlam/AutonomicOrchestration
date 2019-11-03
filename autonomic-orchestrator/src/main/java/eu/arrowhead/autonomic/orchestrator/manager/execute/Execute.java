@@ -93,7 +93,8 @@ public class Execute {
 				 "prefix rdf: <"+RDF.getURI()+">\n" +
 				 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
 				 "select ?c ?s ?a \n" +
-				 "where { ?c rdf:type :Consumer . \n" +
+				 "where { " +
+				 // "?c rdf:type :Consumer . \n" +
 				 "?c :producesService ?s . \n" +
 				 "?s :hasServiceDefinition \"" +  Constants.OrchestrationPushServiceDefinition + "\" . \n" +
 				 "?s :hasOperation ?o . \n" +
@@ -110,7 +111,7 @@ public class Execute {
 	      String addressString = address.getString();
 	      
 	      log.debug("Execute found orchestration push endpoint for " + consumerName + "at: " + addressString);
-	      //System.out.println("Execute found orchestration push endpoint for " + consumerName + "at: " + addressString);
+	     // System.out.println("Execute found orchestration push endpoint for " + consumerName + "at: " + addressString);
 	      //System.out.println(addressString);
 	      consumerOrchestrationPushEndpointTreeMap.put(consumerName, addressString);
 	     

@@ -15,6 +15,11 @@ public class Constants {
 	public static final long ExecuteWorkerInterval = 1000;
 	
 	public static final String OrchestrationPushServiceDefinition = "AutonomicOrchestrationPush";
+	public static final String OrchestrationRegisterServiceDefinition = "AutonomicOrchestrationRegister";
+	public static final String AutonomicOrchestrationName = "AutonomicOrchestrationSystem";
+	public static final int OrchestrationRegisterPort = 8474;
+	public static final String OrchestrationRegisterURI = "auto/orchestration";
 	
 	public static final int SubstitutionParameterSize = 6;
+	public static final int ConfigureParameterSize = 4;
 }

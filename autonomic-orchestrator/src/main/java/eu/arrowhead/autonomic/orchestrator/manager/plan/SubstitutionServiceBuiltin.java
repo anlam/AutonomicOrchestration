@@ -29,7 +29,7 @@ public class SubstitutionServiceBuiltin extends BaseBuiltin {
 	@Override
 	public void headAction(Node[] args, int length, RuleContext context) {
 		
-		//System.out.println("Rule: " + context.getRule().getName());
+		//System.out.println("SubstitutionServiceBuiltin Rule: " + context.getRule().getName());
 		ArrayList<String> parameters = new ArrayList<String>();
 		parameters.add(context.getRule().getName());
 		for(Node n : args)

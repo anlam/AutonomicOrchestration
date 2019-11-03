@@ -3,4 +3,4 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
 @prefix sosa: <http://www.w3.org/ns/sosa#> . 
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> . 
-[rule1: (?c rdf:type :Consumer) (?c :consumesService ?s1) (?s1  :hasState  :OfflineState) (?d1 :hasService ?s1)  (?d1 sosa:hasLocation ?l) (?d2 :hasService ?s2) (?d2  sosa:hasLocation ?l) (?s2  :hasState  :OnlineState) -> substituteService(?c, ?s1, ?s2) (?c :substitudeFrom ?s1) (?c :substitudeTo ?s2) ]
+#[rule1: (?c rdf:type :Consumer) (?c :consumesService ?s1) (?s1  :hasState  :OfflineState) (?d1 :hasService ?s1)  (?d1 sosa:hasLocation ?l) (?d2 :hasService ?s2) (?d2  sosa:hasLocation ?l) (?s2  :hasState  :OnlineState) -> substituteService(?c, ?s1, ?s2) (?c :substitudeFrom ?s1) (?c :substitudeTo ?s2) ]

@@ -93,7 +93,7 @@ public class KnowledgeBase {
 
 	}
 	
-	public static void main(String[] args) {
+	public static void main1(String[] args) {
 		/*
 		 * String updateCurentTimeQuery = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
 		 * "prefix rdfs: <"+RDFS.getURI()+">\n" + "prefix rdf: <"+RDF.getURI()+">\n" +
@@ -104,13 +104,13 @@ public class KnowledgeBase {
 		 * "\"^^xsd:long } \n" + "where {  :DateTimeNow :hasValue ?Value . \n" + "}";
 		 */
 		
-		KnowledgeBase.getInstance().AddSensor("Device_1199791", "Service_1199791", "TopMiddle", "TellUConnector");
+		//KnowledgeBase.getInstance().AddSensor("Device_1199791", "Service_1199791", "TopMiddle", "TellUConnector");
 		KnowledgeBase.getInstance().WriteModelToFile("./dataset.ttl");
 		//KnowledgeBase.getInstance().ExecuteQuery(queries);
 
 	}
 	
-	public static void main1(String[] args) {
+	public static void main(String[] args) {
 		
 		String updateCurentTimeQuery = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
 				 "prefix rdfs: <"+RDFS.getURI()+">\n" +
@@ -119,10 +119,16 @@ public class KnowledgeBase {
 				 "prefix xsd: <"+XSD.getURI()+">\n" 
 				
 				 
-				 + "insert data { "
+				 + "insert data { :TestConsumer :producesService :TestConsumerOrchPush ."
 				
-				+ ":TellUConnector :producesService  :Service_9575530 . \n" 
-				//+ ":Observation_9575530 sosa:hasFeatureOfInterest  :Temperature . \n" 
+				+ 
+				":TestConsumerOrchPush\r\n" + 
+				"        a                      :Service ;\r\n" + 
+				"        :hasOperation          :TestConsumerOrchPushOper ;\r\n" + 
+				"        :hasServiceDefinition  \"AutonomicOrchestrationPush\" .\r\n" + 
+				"\r\n" + 
+				":TestConsumerOrchPushOper\r\n" + 
+				"        :hasAddress  \"http://localhost:8474/auto/orchestration/push\" ." 
 				
 				 + "}";
 		
@@ -323,7 +329,7 @@ public class KnowledgeBase {
 		}
 	}
 	
-	public void AddObservation(String observationId, String sensorId, long timestamp, String value, String featureOfInterest) 
+	public void AddObservation(String observationId, String sensorId, long timestamp, String value, String featureOfInterest, String unit) 
 	{
 		lock.lock();
 		
@@ -372,6 +378,7 @@ public class KnowledgeBase {
 					 ":" + observationId + " sosa:hasFeatureOfInterest :" + featureOfInterest + " . \n" + 
 					 ":" + observationId + " sosa:hasSimpleResult \"" + value + "\"^^xsd:double . \n" + 
 					 ":" + observationId + " sosa:resultTime  \"" + timestamp + "\"^^xsd:long . \n" + 
+					 ":" + observationId + " :hasUnit  \"" + unit + "\" . \n" + 
 					 "}";
 			
 			//System.out.println(addString);
@@ -405,10 +412,10 @@ public class KnowledgeBase {
 
 	}
 	
-	public void AddSensor(String sensorName, String serviceName, String location, String producer)
+	public void AddSensor(String sensorName, String serviceName, String location, String producer, String serviceDefinition)
 	{
 		lock.lock();
-		AddService(serviceName, producer);
+		AddService(serviceName, producer, serviceDefinition);
 		
 		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
 		dataset.begin(ReadWrite.WRITE);
@@ -416,6 +423,19 @@ public class KnowledgeBase {
 		try {
 			
 			Model model = dataset.getNamedModel(OntologyNames.BASE_URL +  Constants.ModelName);
+			
+			String deleteString = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
+					 "prefix rdfs: <"+RDFS.getURI()+">\n" +
+					 "prefix rdf: <"+RDF.getURI()+">\n" +
+					 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
+					 "prefix xsd: <"+XSD.getURI()+">\n" +
+					 "delete data{ "   +
+					 ":" + sensorName + " rdf:type :SensorUnit . \n" + 
+					 //":" + sensorName + " :hasID \"" + sensorName + "\" . \n" + 
+					 ":" + sensorName + " :hasService :" + serviceName + " . \n" + 
+					 ":" + sensorName + " sosa:hasLocation :" + location + " . \n" + 
+					 "}";
+			UpdateAction.parseExecute(deleteString, model);
 			
 			String addString = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
 					 "prefix rdfs: <"+RDFS.getURI()+">\n" +
@@ -448,7 +468,7 @@ public class KnowledgeBase {
 	}
 	
 	
-	public void AddService(String serviceName, String producer)
+	public void AddService(String serviceName, String producer, String serviceDefinition)
 	{
 		lock.lock();
 		
@@ -459,6 +479,21 @@ public class KnowledgeBase {
 			
 			Model model = dataset.getNamedModel(OntologyNames.BASE_URL +  Constants.ModelName);
 			
+			String deleteString = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
+					 "prefix rdfs: <"+RDFS.getURI()+">\n" +
+					 "prefix rdf: <"+RDF.getURI()+">\n" +
+					 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
+					 "prefix xsd: <"+XSD.getURI()+">\n" +
+					 "delete data{ "   +
+					 ":" + serviceName + " rdf:type :Service . \n" + 
+					 ":" + serviceName + " :hasServiceDefinition " + "\"" + serviceDefinition +  "\"" + " . \n" + 
+					 ":" + producer + " rdf:type :Producer . \n" + 
+					 ":" + producer + " :producesService :" + serviceName + " . \n" + 
+					 //":" + serviceName + " :hasID \"" + serviceName + "\" . \n" + 
+					 "}";
+			
+			UpdateAction.parseExecute(deleteString, model);
+			
 			String addString = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
 					 "prefix rdfs: <"+RDFS.getURI()+">\n" +
 					 "prefix rdf: <"+RDF.getURI()+">\n" +
@@ -466,6 +501,8 @@ public class KnowledgeBase {
 					 "prefix xsd: <"+XSD.getURI()+">\n" +
 					 "insert data{ "   +
 					 ":" + serviceName + " rdf:type :Service . \n" + 
+					 ":" + serviceName + " :hasServiceDefinition " + "\"" + serviceDefinition +  "\"" + " . \n" + 
+					 ":" + producer + " rdf:type :Producer . \n" + 
 					 ":" + producer + " :producesService :" + serviceName + " . \n" + 
 					 //":" + serviceName + " :hasID \"" + serviceName + "\" . \n" + 
 					 "}";

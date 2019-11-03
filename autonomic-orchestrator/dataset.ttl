@@ -17,42 +17,7 @@
 
 :Device  a      rdfs:Class .
 
-:PrediktorApisServer  a   :Consumer ;
-        :consumesService  :Service_3244631 ;
-        :hasID            "PrediktorApisServer" ;
-        :producesService  :PrediktorAutoOrchPush .
-
-:Service_3244631  a  :Service ;
-        :hasID     "3244631" ;
-        :hasState  :OnlineState .
-
-:Device_2999285  a        :SensorUnit ;
-        :hasID            "2999285" ;
-        :hasService       :Service_2999285 ;
-        sosa:hasLocation  :TopMiddle .
-
-:Service_2999285  a  :Service ;
-        :hasID     "2999285" ;
-        :hasState  :OnlineState .
-
 sosa:Observation  a  rdfs:Class .
-
-:Observation_3244631  a            sosa:Observation ;
-        sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "2000"^^xsd:double ;
-        sosa:madeBySensor          :Device_3244631 ;
-        sosa:resultTime            1561032849114 .
-
-:Device_3244631  a        :SensorUnit ;
-        :hasID            "3244631" ;
-        :hasService       :Service_3244631 ;
-        sosa:hasLocation  :TopMiddle .
-
-:Observation_2999285  a            sosa:Observation ;
-        sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "3000"^^xsd:double ;
-        sosa:madeBySensor          :Device_2999285 ;
-        sosa:resultTime            1561032856791 .
 
 :ServiceState  a  rdfs:Class .
 
@@ -60,7 +25,7 @@ sosa:Observation  a  rdfs:Class .
 
 :OnlineState  a  :ServiceState .
 
-:DateTimeNow  :hasValue  1561032896915 .
+:DateTimeNow  :hasValue  1572816857368 .
 
 sosa:FeatureOfInterest
         a       rdfs:Class .
@@ -74,9 +39,6 @@ sosa:FeatureOfInterest
 :Producer  a             rdfs:Class ;
         rdfs:subClassOf  :ApplicationSystem .
 
-:TellUConnector  a        :Producer ;
-        :producesService  :Service_3244631 , :Service_2999285 .
-
 :PrediktorAutoOrchPush
         a                      :Service ;
         :hasOperation          :PrediktorAutoOrchOper ;
@@ -84,3 +46,81 @@ sosa:FeatureOfInterest
 
 :PrediktorAutoOrchOper
         :hasAddress  "http://localhost:6565/pull/orchestration/auto" .
+
+:Observation_IndoorTemperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "21.709112558179886"^^xsd:double ;
+        sosa:madeBySensor          :Device_IndoorTemperature ;
+        sosa:resultTime            1572816856928 .
+
+:Device_IndoorTemperature
+        a                 :SensorUnit ;
+        :hasService       :Service_IndoorTemperature ;
+        sosa:hasLocation  :Room1 .
+
+:Service_IndoorTemperature
+        a                      :Service ;
+        :hasServiceDefinition  "IndoorTemperature" ;
+        :hasState              :OnlineState .
+
+:InsecureTemperatureSensor
+        a                 :Producer ;
+        :producesService  :Service_IndoorTemperature .
+
+:Service_IndoorTemperature2
+        a                      :Service ;
+        :hasServiceDefinition  "IndoorTemperature2" ;
+        :hasState              :OnlineState .
+
+:InsecureTemperatureSensor2
+        a                 :Producer ;
+        :producesService  :Service_IndoorTemperature2 .
+
+:Device_IndoorTemperature2
+        a                 :SensorUnit ;
+        :hasService       :Service_IndoorTemperature2 ;
+        sosa:hasLocation  :Room1 .
+
+:Service_IndoorTemperature3
+        a                      :Service ;
+        :hasServiceDefinition  "IndoorTemperature3" ;
+        :hasState              :OfflineState .
+
+:InsecureTemperatureSensor3
+        a                 :Producer ;
+        :producesService  :Service_IndoorTemperature3 .
+
+:Device_IndoorTemperature3
+        a                 :SensorUnit ;
+        :hasService       :Service_IndoorTemperature3 ;
+        sosa:hasLocation  :Room1 .
+
+:Observation_IndoorTemperature2
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "21.71652166550584"^^xsd:double ;
+        sosa:madeBySensor          :Device_IndoorTemperature2 ;
+        sosa:resultTime            1572816857001 .
+
+:Observation_IndoorTemperature3
+        a                          sosa:Observation ;
+        :hasUnit                   "fahrenheit" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "130.8658233614094"^^xsd:double ;
+        sosa:madeBySensor          :Device_IndoorTemperature3 ;
+        sosa:resultTime            1572816335323 .
+
+:TestConsumer  a          :Consumer ;
+        :consumesService  :Service_IndoorTemperature2 ;
+        :producesService  :TestConsumerOrchPush .
+
+:TestConsumerOrchPush
+        a                      :Service ;
+        :hasOperation          :TestConsumerOrchPushOper ;
+        :hasServiceDefinition  "AutonomicOrchestrationPush" .
+
+:TestConsumerOrchPushOper
+        :hasAddress  "http://localhost:8474/auto/orchestration/push" .

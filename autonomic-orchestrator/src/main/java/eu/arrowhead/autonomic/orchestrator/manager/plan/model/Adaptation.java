@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 	      property = "type")
 	    @JsonSubTypes({
 	        @JsonSubTypes.Type(value = SubstitutionAdaptation.class, name = "SubstitutionAdaptation"),
+	        @JsonSubTypes.Type(value = ConfigureAdaptation.class, name = "ConfigureAdaptation")
 	    })
 public class Adaptation {
 	

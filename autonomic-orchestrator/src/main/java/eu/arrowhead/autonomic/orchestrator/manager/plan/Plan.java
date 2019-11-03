@@ -9,15 +9,19 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.rdf.model.InfModel;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.rulesys.BuiltinRegistry;
 import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.util.PrintUtil;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
@@ -29,6 +33,8 @@ import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.Adaptation;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.AdaptationPlan;
+import eu.arrowhead.autonomic.orchestrator.manager.plan.model.OrchestrationRuleDelete;
+import eu.arrowhead.autonomic.orchestrator.manager.plan.model.OrchestrationRuleRegister;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.PlanStatus;
 
 public class Plan {
@@ -50,10 +56,13 @@ public class Plan {
 		planWorker = new PlanWorker(this, Constants.PlanWorkerInterval);
 		
 		BuiltinRegistry.theRegistry.register(new SubstitutionServiceBuiltin(this));
+		BuiltinRegistry.theRegistry.register(new ConfigureBuiltin(this));
 		
 		ConsumerAdaptationPlansTreeMap = new TreeMap<String, AdaptationPlan>();
 		updatePlanLock =  new ReentrantLock();
 	}
+	
+	
 	
 	
 	
@@ -180,6 +189,8 @@ public class Plan {
 	
 	public void start()
 	{
+		UpdateRuleFromKnowledgeBase();
+		
 		planWorker.start();
 	}
 	
@@ -225,6 +236,184 @@ public class Plan {
 		 */
 	}
 	
+	private void UpdateRuleFromKnowledgeBase()
+	{
+		String queryString = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
+				 "prefix rdfs: <"+RDFS.getURI()+">\n" +
+				 "prefix rdf: <"+RDF.getURI()+">\n" +
+				 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
+				 "select ?s ?r ?b \n" +
+				 "where { ?s :hasJenaRule ?r . \n" +
+				 "?r :hasBody ?b . \n" +
+				 "}";
+		
+		List<QuerySolution> results = KnowledgeBase.getInstance().ExecuteSelectQuery(queryString);
+		
+	    for (QuerySolution soln : results )
+	    {
+	      Resource system =  soln.getResource("s");
+	      String systemName = system.getLocalName();
+	      
+	      Literal body =  soln.getLiteral("b");
+	      String bodyString = body.getString();
+	      
+	      List<Rule> rules = new ArrayList<Rule>();
+	      Rule r = Rule.parseRule(bodyString);
+	      
+	      log.debug("Plan: New rule registered for consumer: " + systemName);
+		  System.out.println("Plan: New rule registered for consumer: " + systemName);
+		  System.out.println(r);
+		  
+			
+	      if(ConsumerRulesTreeMap.containsKey(systemName))
+	    	  rules.addAll(ConsumerRulesTreeMap.get(systemName));
+	      rules.add(r);
+	      ConsumerRulesTreeMap.put(systemName, rules);
+	      
+	     
+	    }
+	}
+	
+	public List<Rule> RegisterRules(OrchestrationRuleRegister requestRules)
+	{
+		
+		List<Rule> rules = new ArrayList<Rule>();
+		List<Rule> updatedRules = new ArrayList<Rule>();
+		
+		for(String rule : requestRules.getRules())
+		{
+			try {
+				rules.add(Rule.parseRule(rule));
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		
+		
+		List<Rule> currentRules = new ArrayList<Rule>();
+		if(ConsumerRulesTreeMap.containsKey(requestRules.getSystemName()))
+		{
+			currentRules.addAll(ConsumerRulesTreeMap.get(requestRules.getSystemName()));
+		}
+		
+		System.out.println("Plan: New rule registered for consumer: " + requestRules.getSystemName());
+		
+		int i = currentRules.size() + 1;
+		for(Rule r : rules)
+		{
+			Rule newRule = new Rule(requestRules.getSystemName() + "_rule" + i , r.getHead(), r.getBody());
+			updatedRules.add(newRule);
+			currentRules.add(newRule);
+			i++;
+			System.out.println(newRule);
+		}
+		
+		ConsumerRulesTreeMap.put(requestRules.getSystemName(), currentRules);
+		
+		AddRuleToKnowledgeBase(requestRules.getSystemName(), updatedRules);
+		
+		
+		return updatedRules;
+	}
+	
+	
+	private void AddRuleToKnowledgeBase(String name, List<Rule> rules)
+	{
+		String updateCurentTimeQuery = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
+				 "prefix rdfs: <"+RDFS.getURI()+">\n" +
+				 "prefix rdf: <"+RDF.getURI()+">\n" +
+				 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
+				 "prefix xsd: <"+XSD.getURI()+">\n" 
+				
+				 
+				 + "insert data { \n ";
+		
+		
+		for(Rule r : rules)
+		{
+			updateCurentTimeQuery = updateCurentTimeQuery + ":" + name + " :hasJenaRule :"  + r.getName()  + " . \n" 
+									+ ":"  + r.getName() + " :hasBody \"" + r.toString() + "\" . \n" ;
+		}
+				
+				
+				
+				
+				
+		updateCurentTimeQuery +=  " }";
+		
+		System.out.println(updateCurentTimeQuery);
+		
+		List<String> queries = new ArrayList<String>();
+		queries.add(updateCurentTimeQuery);
+		
+		
+		KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);
+	}
+	
+	private void DeleteRuleFromKnowledgeBase(String name, List<String> rules)
+	{
+		List<String> queries = new ArrayList<String>();
+		
+		for(String r : rules)
+		{
+			String updateString = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
+					 "prefix rdfs: <"+RDFS.getURI()+">\n" +
+					 "prefix rdf: <"+RDF.getURI()+">\n" +
+					 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
+					 "prefix xsd: <"+XSD.getURI()+">\n" +
+					 
+					 "delete { :" + name + " :hasJenaRule :"  + r  + " . \n" 
+					 + ":"  + r + " :hasBody ?body . \n" 
+					 + "} \n" 
+					 + "where { :" + name + " :hasJenaRule :"  + r  + " . \n" 
+					 + ":"  + r + " :hasBody ?body . \n" 
+					 + "}";
+			
+			queries.add(updateString);
+		}
+		
+		KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);
+		
+	}
+	
+	public List<Rule> getRules(String systemName)
+	{
+		List<Rule> ret = new ArrayList<Rule>();
+		if(ConsumerRulesTreeMap.containsKey(systemName))
+			ret.addAll(ConsumerRulesTreeMap.get(systemName));
+		return ret;
+	}
+	
+	public List<String> getRegisterSystems()
+	{
+		List<String> ret = new ArrayList<String>();
+		ret.addAll(ConsumerRulesTreeMap.keySet());
+		
+		return ret;
+	}
+	
+	public boolean deleteRules(OrchestrationRuleDelete rulesName)
+	{
+		if(ConsumerRulesTreeMap.containsKey(rulesName.getSystemName()))
+		{
+			List<Rule> currentRulesList =  new ArrayList<Rule>();
+			List<Rule> updatedRulesList =  new ArrayList<Rule>();
+			currentRulesList.addAll(ConsumerRulesTreeMap.get(rulesName.getSystemName()));
+			updatedRulesList.addAll(ConsumerRulesTreeMap.get(rulesName.getSystemName()));
+			for(Rule r : currentRulesList)
+				if(rulesName.getRules().contains(r.getName()))
+					updatedRulesList.remove(r);
+			ConsumerRulesTreeMap.put(rulesName.getSystemName(), updatedRulesList);
+			
+			DeleteRuleFromKnowledgeBase(rulesName.getSystemName(), rulesName.getRules());
+			return true;
+		}
+		
+		return false;
+	}
 	
 	private void UpdateRules()
 	{
@@ -258,6 +447,8 @@ public class Plan {
 				
 				
 				
+				
+				
 				log.debug("Plan: New rule registered for consumer: " + name);
 				System.out.println("Plan: New rule registered for consumer: " + name);
 				
@@ -270,6 +461,16 @@ public class Plan {
 					modifiedRules.add(newRule);
 					i++;
 					System.out.println(newRule);
+					//System.out.println(newRule.);
+					
+					//PrintUtil.registerPrefix("sosa", OntologyNames.SOSA_URL);
+					//PrintUtil.registerPrefix("auto", OntologyNames.BASE_URL);
+					//PrintUtil.registerPrefix("rdfs", RDFS.uri);
+					//PrintUtil.registerPrefix("xsd", XSD.NS);
+					//PrintUtil.registerPrefix("rdf", RDF.getURI());
+					
+					//System.out.println(PrintUtil.print(newRule));
+				
 				}
 					
 				ConsumerRulesTreeMap.put(name, modifiedRules);

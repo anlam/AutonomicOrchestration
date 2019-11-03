@@ -81,7 +81,7 @@ public class Monitor {
 				 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
 				 "prefix xsd: <"+XSD.getURI()+">\n" +
 				 "delete { :DateTimeNow :hasValue ?Value} \n" +
-				 "insert { :DateTimeNow :hasValue \"" + new Date().getTime() + "\"^^xsd:long } \n" + 
+				 "insert { :DateTimeNow :hasValue \"" + System.currentTimeMillis() + "\"^^xsd:long } \n" + 
 				 "where {  :DateTimeNow :hasValue ?Value . \n" +
 				 "}";
 		
@@ -111,12 +111,12 @@ public class Monitor {
 	
 	
 	
-	public void AddObservation(String observationId, String sensorId, long timestamp, String value, String featureOfInterest) 
+	public void AddObservation(String observationId, String sensorId, long timestamp, String value, String featureOfInterest, String unit) 
 	{
 		log.debug("Monitor Updating Observation: " + observationId);
 		//System.out.println("Monitor Updating Observation: " + observationId);
 		
-	    KnowledgeBase.getInstance().AddObservation(observationId, sensorId, timestamp, value, featureOfInterest);
+	    KnowledgeBase.getInstance().AddObservation(observationId, sensorId, timestamp, value, featureOfInterest, unit);
 	}
 	
 	public static void main4(String[] args) throws FileNotFoundException {
