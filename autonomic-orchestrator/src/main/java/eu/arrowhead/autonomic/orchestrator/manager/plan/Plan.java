@@ -200,7 +200,7 @@ public class Plan {
 	}
 	
 	public void WorkerProcess() {
-		UpdateRules();
+		//UpdateRules();
 		StartReasoning();
 	}
 	
@@ -246,6 +246,7 @@ public class Plan {
 				 "where { ?s :hasJenaRule ?r . \n" +
 				 "?r :hasBody ?b . \n" +
 				 "}";
+		
 		
 		List<QuerySolution> results = KnowledgeBase.getInstance().ExecuteSelectQuery(queryString);
 		
@@ -332,6 +333,12 @@ public class Plan {
 				 + "insert data { \n ";
 		
 		
+		PrintUtil.removePrefix("sosa");
+		PrintUtil.removePrefix("auto");
+		PrintUtil.removePrefix("rdfs");
+		PrintUtil.removePrefix("xsd");
+		PrintUtil.removePrefix("rdf");
+
 		for(Rule r : rules)
 		{
 			updateCurentTimeQuery = updateCurentTimeQuery + ":" + name + " :hasJenaRule :"  + r.getName()  + " . \n" 

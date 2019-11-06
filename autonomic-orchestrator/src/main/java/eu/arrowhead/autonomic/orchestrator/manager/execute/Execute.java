@@ -162,10 +162,13 @@ public class Execute {
 						
 					}
 				}
+				
+				plan.RemoveAllAdaptations(consumerName);
+				
 			}
 			
 
-			plan.RemoveAdaptationPlans(consumerName, executedAdapts);
+			//plan.RemoveAdaptationPlans(consumerName, executedAdapts);
 			plan.UpdateAdaptationPlanStatus(consumerName, PlanStatus.EXECUTED);
 			
 		}

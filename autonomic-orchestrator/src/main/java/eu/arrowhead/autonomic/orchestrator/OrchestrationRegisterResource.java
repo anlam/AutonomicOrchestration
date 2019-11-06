@@ -28,11 +28,14 @@ import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.Plan;
+import eu.arrowhead.autonomic.orchestrator.manager.plan.model.Adaptation;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.AdaptationPlan;
+import eu.arrowhead.autonomic.orchestrator.manager.plan.model.AdaptationType;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.OrchestrationRuleDelete;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.OrchestrationRuleRegister;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.PlanStatus;
@@ -47,7 +50,7 @@ public class OrchestrationRegisterResource {
   public static Plan plan;
 
   @GET
-  @Path("")
+  @Path("/")
   public Response getAllRule() {
 	  
 	  if(plan == null)
@@ -69,7 +72,7 @@ public class OrchestrationRegisterResource {
 		  ret.add(orchRe);
 	  }
 	   
-	  return Response.status(Status.OK).entity(ret).build();
+	  return Response.status(Status.OK).header("Access-Control-Allow-Origin", "*").entity(ret).build();
   }
   
   @GET
@@ -106,7 +109,7 @@ public class OrchestrationRegisterResource {
 		  ret.add(orchRe);
 	  }
 	   
-	  return Response.status(Status.OK).entity(ret).build();
+	  return Response.status(Status.OK).entity(ret).header("Access-Control-Allow-Origin", "*").build();
   }
   
   @PUT
@@ -130,7 +133,7 @@ public class OrchestrationRegisterResource {
 	  updatedForm.setRules(rulesList);
 	  
 	    //Return a response with Accepted status code
-	    return Response.status(Status.ACCEPTED).entity(updatedForm).build();
+	    return Response.status(Status.ACCEPTED).header("Access-Control-Allow-Origin", "*").entity(updatedForm).build();
 	  }
 	  
   @PUT
@@ -145,7 +148,7 @@ public class OrchestrationRegisterResource {
 	  if(!ret)
 		  return Response.status(Status.BAD_REQUEST).build();
 	  
-	  return Response.status(Status.ACCEPTED).build();
+	  return Response.status(Status.ACCEPTED).header("Access-Control-Allow-Origin", "*").build();
   }
   
 	/*
@@ -167,15 +170,43 @@ public class OrchestrationRegisterResource {
 		 * // Return a response with Accepted status code
 		 */		
 		System.out.println("Receive: " + adaptation);
-		adaptation.getAdaptations().get(0).setStatus(PlanStatus.EXECUTED);
 		
-		Gson gson = new Gson();
+		for(Adaptation tadap : adaptation.getAdaptations())
+		{
+			if(tadap.getType().equals(AdaptationType.SubstitutionAdaptation))
+			{
+				tadap.setStatus(PlanStatus.EXECUTED);
+				break;
+			}
+		}
+		
+		
+		sentAdapat = adaptation;
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		String sValue = gson.toJson(adaptation);
 		System.out.println("Sending response: ");
 		System.out.println(sValue);
 		
-		return Response.status(Status.OK).entity(sValue).build();
+		return Response.status(Status.OK).header("Access-Control-Allow-Origin", "*").entity(sValue).build();
 	}
+	
+	
+	private static AdaptationPlan sentAdapat = null;
+	@GET
+	@Path("getSentAdapations")
+	public Response sentAdapationResponse() {
+		String sValue = "";
+		if(sentAdapat != null)
+		{
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			sValue = gson.toJson(sentAdapat);
+			sentAdapat = null;
+		}
+		
+		return Response.status(Status.OK).header("Access-Control-Allow-Origin", "*").entity(sValue).build();
+	}
+	
+	
   
 
 }

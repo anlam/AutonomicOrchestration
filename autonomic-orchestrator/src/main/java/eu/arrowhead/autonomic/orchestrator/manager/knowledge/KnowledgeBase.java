@@ -119,18 +119,12 @@ public class KnowledgeBase {
 				 "prefix xsd: <"+XSD.getURI()+">\n" 
 				
 				 
-				 + "insert data { :TestConsumer :producesService :TestConsumerOrchPush ."
+				 + "delete data { "
 				
 				+ 
-				":TestConsumerOrchPush\r\n" + 
-				"        a                      :Service ;\r\n" + 
-				"        :hasOperation          :TestConsumerOrchPushOper ;\r\n" + 
-				"        :hasServiceDefinition  \"AutonomicOrchestrationPush\" .\r\n" + 
+				":ANewConsumer  :hasJenaRule  :ANewConsumer_rule1 .\r\n" + 
 				"\r\n" + 
-				":TestConsumerOrchPushOper\r\n" + 
-				"        :hasAddress  \"http://localhost:8474/auto/orchestration/push\" ." 
-				
-				 + "}";
+				":ANewConsumer_rule1  :hasBody  \"[ ANewConsumer_rule1: (?c rdf:type auto:Consumer) (?c auto:consumesService ?s1) (?s1 auto:hasState auto:OfflineState) (?o1 sosa:madeBySensor ?d1) (?o1 auto:hasUnit ?u1) (?p1 auto:producesService ?s1) (?d1 auto:hasService ?s1) (?d1 sosa:hasLocation ?l) (?d2 auto:hasService ?s2) (?o2 sosa:madeBySensor ?d2) (?o2 auto:hasUnit ?u2) notEqual(?u1 ?u2) (?d2 sosa:hasLocation ?l) (?s2 auto:hasState auto:OnlineState) (?p2 auto:producesService ?s2) -> substituteService(?c ?s1 ?p1 ?s2 ?p2) configure(?c 'unit' ?u2) ]\" ." + "}";
 		
 		System.out.println(updateCurentTimeQuery);
 		

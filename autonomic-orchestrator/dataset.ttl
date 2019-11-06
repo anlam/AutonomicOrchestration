@@ -25,7 +25,7 @@ sosa:Observation  a  rdfs:Class .
 
 :OnlineState  a  :ServiceState .
 
-:DateTimeNow  :hasValue  1572816857368 .
+:DateTimeNow  :hasValue  1573079872210 .
 
 sosa:FeatureOfInterest
         a       rdfs:Class .
@@ -51,9 +51,9 @@ sosa:FeatureOfInterest
         a                          sosa:Observation ;
         :hasUnit                   "celsius" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "21.709112558179886"^^xsd:double ;
+        sosa:hasSimpleResult       "21.85010594230115"^^xsd:double ;
         sosa:madeBySensor          :Device_IndoorTemperature ;
-        sosa:resultTime            1572816856928 .
+        sosa:resultTime            1573079871778 .
 
 :Device_IndoorTemperature
         a                 :SensorUnit ;
@@ -101,20 +101,21 @@ sosa:FeatureOfInterest
         a                          sosa:Observation ;
         :hasUnit                   "celsius" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "21.71652166550584"^^xsd:double ;
+        sosa:hasSimpleResult       "21.123022852940615"^^xsd:double ;
         sosa:madeBySensor          :Device_IndoorTemperature2 ;
-        sosa:resultTime            1572816857001 .
+        sosa:resultTime            1573079872170 .
 
 :Observation_IndoorTemperature3
         a                          sosa:Observation ;
         :hasUnit                   "fahrenheit" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "130.8658233614094"^^xsd:double ;
+        sosa:hasSimpleResult       "129.59810687764468"^^xsd:double ;
         sosa:madeBySensor          :Device_IndoorTemperature3 ;
-        sosa:resultTime            1572816335323 .
+        sosa:resultTime            1573079768781 .
 
 :TestConsumer  a          :Consumer ;
         :consumesService  :Service_IndoorTemperature2 ;
+        :hasJenaRule      :TestConsumer_rule1 ;
         :producesService  :TestConsumerOrchPush .
 
 :TestConsumerOrchPush
@@ -124,3 +125,9 @@ sosa:FeatureOfInterest
 
 :TestConsumerOrchPushOper
         :hasAddress  "http://localhost:8474/auto/orchestration/push" .
+
+:TestConsumer_rule1  :hasBody  "[ TestConsumer_rule1: (?c rdf:type <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#Consumer>) (?c <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#consumesService> ?s1) (?s1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasState> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#OfflineState>) (?o1 <http://www.w3.org/ns/sosa#madeBySensor> ?d1) (?o1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasUnit> ?u1) (?p1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#producesService> ?s1) (?d1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasService> ?s1) (?d1 <http://www.w3.org/ns/sosa#hasLocation> ?l) (?d2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasService> ?s2) (?o2 <http://www.w3.org/ns/sosa#madeBySensor> ?d2) (?o2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasUnit> ?u2) notEqual(?u1 ?u2) (?d2 <http://www.w3.org/ns/sosa#hasLocation> ?l) (?s2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasState> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#OnlineState>) (?p2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#producesService> ?s2) -> substituteService(?c ?s1 ?p1 ?s2 ?p2) configure(?c 'unit' ?u2) ]" .
+
+:ANewConsumer  :hasJenaRule  :ANewConsumer_rule1 .
+
+:ANewConsumer_rule1  :hasBody  "[ ANewConsumer_rule1: (?c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#Consumer>) (?c <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#consumesService> ?s1) (?s1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasState> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#OfflineState>) (?o1 <http://www.w3.org/ns/sosa#madeBySensor> ?d1) (?o1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasUnit> ?u1) (?p1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#producesService> ?s1) (?d1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasService> ?s1) (?d1 <http://www.w3.org/ns/sosa#hasLocation> ?l) (?d2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasService> ?s2) (?o2 <http://www.w3.org/ns/sosa#madeBySensor> ?d2) (?o2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasUnit> ?u2) notEqual(?u1 ?u2) (?d2 <http://www.w3.org/ns/sosa#hasLocation> ?l) (?s2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasState> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#OnlineState>) (?p2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#producesService> ?s2) -> substituteService(?c ?s1 ?p1 ?s2 ?p2) configure(?c 'unit' ?u2) ]" .
