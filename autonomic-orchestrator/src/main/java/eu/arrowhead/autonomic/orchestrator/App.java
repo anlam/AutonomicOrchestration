@@ -51,6 +51,7 @@ public class App
 		execute.start();
 		
 		OrchestrationRegisterResource.plan = plan;
+		OrchestrationRegisterResource.analysis = analysis;
 		new OrchestrationRegisterProvider();
 		
 		

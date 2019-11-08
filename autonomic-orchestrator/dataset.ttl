@@ -25,7 +25,7 @@ sosa:Observation  a  rdfs:Class .
 
 :OnlineState  a  :ServiceState .
 
-:DateTimeNow  :hasValue  1573079872210 .
+:DateTimeNow  :hasValue  1573217176812 .
 
 sosa:FeatureOfInterest
         a       rdfs:Class .
@@ -51,9 +51,9 @@ sosa:FeatureOfInterest
         a                          sosa:Observation ;
         :hasUnit                   "celsius" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "21.85010594230115"^^xsd:double ;
+        sosa:hasSimpleResult       "21.625840525395002"^^xsd:double ;
         sosa:madeBySensor          :Device_IndoorTemperature ;
-        sosa:resultTime            1573079871778 .
+        sosa:resultTime            1573217176387 .
 
 :Device_IndoorTemperature
         a                 :SensorUnit ;
@@ -86,7 +86,7 @@ sosa:FeatureOfInterest
 :Service_IndoorTemperature3
         a                      :Service ;
         :hasServiceDefinition  "IndoorTemperature3" ;
-        :hasState              :OfflineState .
+        :hasState              :OnlineState .
 
 :InsecureTemperatureSensor3
         a                 :Producer ;
@@ -101,17 +101,17 @@ sosa:FeatureOfInterest
         a                          sosa:Observation ;
         :hasUnit                   "celsius" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "21.123022852940615"^^xsd:double ;
+        sosa:hasSimpleResult       "21.976350693779995"^^xsd:double ;
         sosa:madeBySensor          :Device_IndoorTemperature2 ;
-        sosa:resultTime            1573079872170 .
+        sosa:resultTime            1573217176476 .
 
 :Observation_IndoorTemperature3
         a                          sosa:Observation ;
         :hasUnit                   "fahrenheit" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "129.59810687764468"^^xsd:double ;
+        sosa:hasSimpleResult       "106.6215699327465"^^xsd:double ;
         sosa:madeBySensor          :Device_IndoorTemperature3 ;
-        sosa:resultTime            1573079768781 .
+        sosa:resultTime            1573217176574 .
 
 :TestConsumer  a          :Consumer ;
         :consumesService  :Service_IndoorTemperature2 ;

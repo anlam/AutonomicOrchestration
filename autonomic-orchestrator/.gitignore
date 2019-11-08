@@ -1,2 +1,3 @@
+/src/main/resources/dataset/
+*.dat
 /target/
-/src/main/resources/dataset

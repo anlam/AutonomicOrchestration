@@ -11,9 +11,10 @@ package eu.arrowhead.autonomic.orchestrator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -22,6 +23,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.jena.reasoner.rulesys.Rule;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateRequest;
 import org.apache.jena.util.PrintUtil;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -30,6 +33,8 @@ import org.apache.jena.vocabulary.XSD;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import eu.arrowhead.autonomic.orchestrator.manager.analysis.Analysis;
+import eu.arrowhead.autonomic.orchestrator.manager.analysis.AnalysisQueryRequest;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.Plan;
@@ -48,6 +53,7 @@ public class OrchestrationRegisterResource {
 
   //static final String SERVICE_URI = Constants.OrchestrationRegisterURI;
   public static Plan plan;
+  public static Analysis analysis;
 
   @GET
   @Path("/")
@@ -76,7 +82,7 @@ public class OrchestrationRegisterResource {
   }
   
   @GET
-  @Path("get")
+  @Path("rules")
   public Response getAllRule2() {
 	  
 	  if(plan == null)
@@ -112,7 +118,29 @@ public class OrchestrationRegisterResource {
 	  return Response.status(Status.OK).entity(ret).header("Access-Control-Allow-Origin", "*").build();
   }
   
-  @PUT
+  @GET
+  @Path("queries")
+  public Response getAllQueries() {
+	  TreeMap<String, String> queries = analysis.getAllQuries();
+	  
+	  List<AnalysisQueryRequest> queriesRequest = new ArrayList<AnalysisQueryRequest>();
+	  for(String key : queries.keySet())
+	  {
+		  String query =  queries.get(key);
+		  UpdateRequest request =  UpdateFactory.create(query);
+		  //Query q = QueryFactory.create(query);
+		  //queries.put(key, request.toString());
+		  AnalysisQueryRequest q = new AnalysisQueryRequest();
+		  q.setName(key);
+		  q.setQuery(request.toString());
+		  queriesRequest.add(q);
+		  
+	  }
+	  return Response.status(Status.OK).entity(queriesRequest).header("Access-Control-Allow-Origin", "*").build();
+  }
+  
+  //@PUT
+  @POST
   @Path("register")
   public Response updateRule(OrchestrationRuleRegister rules) {
 	  
@@ -133,22 +161,28 @@ public class OrchestrationRegisterResource {
 	  updatedForm.setRules(rulesList);
 	  
 	    //Return a response with Accepted status code
-	    return Response.status(Status.ACCEPTED).header("Access-Control-Allow-Origin", "*").entity(updatedForm).build();
+	    return Response.status(Status.OK).header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Methods", "*")
+				    .header("Access-Control-Allow-Headers", "*")
+				    .header("Access-Control-Max-Age", "86400").entity(updatedForm).build();
 	  }
 	  
-  @PUT
+  //@PUT
+  @POST
   @Path("delete")
   public Response deleteRule(OrchestrationRuleDelete rules)
   {
 	  if(plan == null)
 	  {
-		  return Response.status(Status.BAD_REQUEST).build();
+		  return Response.status(Status.BAD_REQUEST).header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Methods", "GET, POST, PUT").build();
 	  }
 	  boolean ret =  plan.deleteRules(rules);
 	  if(!ret)
-		  return Response.status(Status.BAD_REQUEST).build();
+		  return Response.status(Status.BAD_REQUEST).header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Methods", "GET, POST, PUT").build();
 	  
-	  return Response.status(Status.ACCEPTED).header("Access-Control-Allow-Origin", "*").build();
+	  return Response.status(Status.OK).header("Access-Control-Allow-Origin", "*")
+			  						    .header("Access-Control-Allow-Methods", "*")
+			  						    .header("Access-Control-Allow-Headers", "*")
+			  						    .header("Access-Control-Max-Age", "86400").build();
   }
   
 	/*
@@ -159,6 +193,7 @@ public class OrchestrationRegisterResource {
 	 * partial updates.
 	 */
 	@PUT
+	//@POST
 	@Path("push")
 	public Response sendOrchestrationResponse(AdaptationPlan adaptation) {
 		/*

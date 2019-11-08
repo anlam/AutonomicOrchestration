@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+<title>Autonomic Orchestration System Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<style type="text/css">
+
+#contents {
+	margin: 15px 0 0 0;
+	display: true;
+	text-align: left;
+	background-color: rgba(0,0,0,0.1);
+	padding: 10px;
+	font-size: 13px;
+	
+	overflow: auto;
+}
+
+#message {
+	margin: 15px 0 0 0;
+	display: true;
+	text-align: left;
+	background-color: lightgrey;
+	padding: 10px;
+	font-size: 13px;
+	overflow: auto;
+	max-height: 500px;
+}
+
+
+
+#file-input-label {
+	width: 200px;
+	cursor: pointer;
+	background-color: #336699;
+	color: white;
+	padding: 10px;
+	display: block;
+	margin: 0 auto;
+}
+
+#file-input {
+	display: none;
+}
+
+#file-progress-container {
+	display: none;
+	margin: 15px 0 0 0;
+}
+
+</style>
+
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  text-align: left;
+}
+
+.box {
+display: flex;
+}
+
+.one {
+flex: 1 1 auto;
+}
+
+.two {
+flex: 1 1 auto;
+text-align:center;
+}
+
+</style>
+<body>
+
+<div class="w3-container">
+  <h2>Autonomic Orchestration System</h2>
+
+  <div class="w3-bar w3-black">
+    <button class="w3-bar-item w3-button tablink w3-red" onclick="openCity(event,'London')">Knowledge Base</button>
+	<button class="w3-bar-item w3-button tablink" onclick="openCity(event,'Rules')">Rules and Queries</button>
+    <button class="w3-bar-item w3-button tablink" onclick="openCity(event,'Paris')">Display Temperature Demonstration</button>
+	<button class="w3-bar-item w3-button tablink" onclick="openCity(event,'Poster')">Poster</button>
+	<button class="w3-bar-item w3-button tablink" onclick="openCity(event,'Sequence')">Sequence Diagram</button>
+	
+  </div>
+  
+  <div id="London" class="w3-container w3-border city">
+    <h2>Knowledge Base</h2>
+	<label for="file-input" id="file-input-label">Choose Text File</label>
+	<input type="file" id="file-input" accept="text/plain" />
+	<div id="file-progress-container"><span id="file-progress-percent"></span>% read</div>
+	<pre><code id="contents">Knowledge Base</code><pre>
+  </div>
+
+  <div id="Paris" class="w3-container w3-border city" style="display:none">
+    <h2>Display Temperature Demonstration</h2>
+	<div align="center">
+		<p><strong>Current Temperature:</strong></p>
+		<p id = "cProducer"> producer </p>
+		<p id = "cTemp"> producer </p>
+		<p id = "cUnit"> kelvin </p>
+	</div>
+	<br>
+	<br>
+	<div align="center">
+		<p><strong>Available Temperature Sensors:</strong></p>
+		<table>
+			<tr>
+				<th>Producer:</th>
+				<td id = "producer0" >InsecureTemperatureSensor</td>
+				<td id = "producer1" >InsecureTemperatureSensor2</td>
+				<td id = "producer2" >InsecureTemperatureSensor3</td>
+			</tr>
+			<tr >
+				<th>Temperature Value:</th>
+				<td id = "temp0" >21</td>
+				<td id = "temp1" >22</td>
+				<td id = "temp2">23</td>
+			</tr>
+			<tr>
+				<th>Unit:</th>
+				<td id = "unit0" > Celsius</td>
+				<td id = "unit1" > Fahrenheit</td>
+				<td id = "unit2" > Fahrenheit</td>
+			</tr>
+			<tr>
+				<th>Location:</th>
+				<td id = "loc0" >Room1</td>
+				<td id = "loc1" >Room1</td>
+				<td id = "loc2" >Room1</td>
+			</tr>
+			<tr>
+				<th>Status:</th>
+				<td><button type="button" id = "button0"  onclick="startStop(0)">start</button></td>
+				<td><button type="button" id = "button1"  onclick="startStop(1)">start</button></td>
+				<td><button type="button" id = "button2"  onclick="startStop(2)">start</button></td>
+			</tr>
+		</table>
+	</div>
+	<br>
+	<br>
+	<div class="box">
+		<div id = "message" class ="one">
+			<strong>Messages:</strong>
+			<pre><code id = "log"></code><pre>
+		</div>
+		<div class ="two">	
+			   <br><br>
+			  <textarea rows="15" cols="60" id="requestForm"></textarea>
+			  <br><br>
+			  <button type="button" id="registerButton" onclick="ruleUpdate('register')">Register</button>
+			  <button type="button" id="deleteButton" onclick="ruleUpdate('delete')">Delete</button>
+		</div>
+	</div>
+	
+  </div>
+  
+  <div id="Rules" class="w3-container w3-border city" style="display:none">
+    <h2>Rules</h2>
+    <p id = "rules"></p> 
+	<h2>Queries</h2>
+	<p id = "queries"></p> 
+  </div>
+  
+  <div id="Poster" class="w3-container w3-border city" style="display:none">
+	<img src="Poster.png" alt="Porto Poster" width="100%">
+  </div>
+  
+  <div id="Sequence" class="w3-container w3-border city" style="display:none">
+	
+	<embed src="sequence.pdf" width="100%" height="800px" />
+  </div>
+  
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+function ruleUpdate(type) 
+{
+	var add = "http://localhost:8474/auto/orchestration/" + type;
+	console.log(add);
+	
+	var xhttp = new XMLHttpRequest();
+	var content = document.getElementById("requestForm").value;
+	console.log(content);
+	 xhttp.onreadystatechange = function() {
+		var header = xhttp.getAllResponseHeaders();
+		console.log(header);
+		if (this.readyState == 4 && this.status == 200) {
+			document.getElementById("requestForm").value = "";
+			
+		}};
+	xhttp.open("POST", add, true);
+	xhttp.setRequestHeader("Content-Type", "application/json");
+	xhttp.send(content);
+	console.log(xhttp.status);
+}
+</script>
+<script>
+$( document ).ready(function() {
+	loadRules();
+	loadQueries();
+	UpdateTemperature0();
+	UpdateTemperature1();
+	UpdateTemperature2();
+	getOrchestration();
+	updateButonLable();
+	
+	hightlightCurrentValue(0, currentTempIndex);
+	
+});
+
+var currentTempIndex = 1;
+var rooms = ["Room1", "Room1", "Room1"];
+var producers = ["InsecureTemperatureSensor", "InsecureTemperatureSensor2", "InsecureTemperatureSensor3"];
+var address = ["http://localhost:8460/temperature", "http://localhost:8462/temperature", "http://localhost:8463/temperature" ];
+
+function hightlightCurrentValue(oldIndex, newIndex)
+{
+	document.getElementById("producer" + oldIndex).style = "";
+	document.getElementById("temp" + oldIndex).style = "";
+	document.getElementById("unit" + oldIndex).style = "";
+	document.getElementById("loc" + oldIndex).style = "";
+	document.getElementById("producer" + newIndex).style = "color:red";
+	document.getElementById("temp" + newIndex).style = "color:red";
+	document.getElementById("unit" + newIndex).style = "color:red";
+	document.getElementById("loc" + newIndex).style = "color:red";
+	
+}
+function getOrchestration()
+{
+	var add = "http://localhost:8474/auto/orchestration/getSentAdapations";
+	
+		setTimeout(function() {
+	
+	  var xhttp = new XMLHttpRequest();
+	  xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+		
+			if(this.responseText != "")
+			{
+				var myObj = JSON.parse(this.responseText);
+				document.getElementById("log").innerText += "\n [" + Date.now().toString() + "] Received adapatation: \n" + this.responseText;
+				
+				var i;
+				for(i= 0; i < myObj.adaptations.length; i++)
+				{
+					if(myObj.adaptations[i].status == "EXECUTED")
+					{
+						console.log("EXECUTED");
+						if(myObj.adaptations[i].type == "SubstitutionAdaptation")
+						{
+							var oldCurrentIndex = currentTempIndex;
+							console.log(myObj.adaptations[i].toProducer);
+							if(myObj.adaptations[i].toProducer == "InsecureTemperatureSensor3")
+								currentTempIndex = 2;
+							else if (myObj.adaptations[i].toProducer == "InsecureTemperatureSensor2")
+								currentTempIndex = 1;
+							else 
+								currentTempIndex = 0;
+							console.log("index " + currentTempIndex);
+							hightlightCurrentValue(oldCurrentIndex, currentTempIndex);
+						}
+					}
+				}
+			}
+		  //var myObj = JSON.parse(this.responseText);
+		  
+		  //document.getElementById("log").innerText += "\n[" + Date.now().toString() + "] getOrchestration....";
+		}
+	  };
+	  
+	  xhttp.open("GET", add, true);
+	  xhttp.send();
+	  
+	  getOrchestration();
+	  
+	}, 1000);
+}
+
+function startStop(index) 
+{
+	var add = address[index] + "/" + $("#button" + index).text();
+	console.log(add);
+	
+	var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() 
+		{
+			updateButonLable();
+		};
+		xhttp.open("GET", add, true);
+		xhttp.send();
+		
+}
+
+function updateButonLable()
+{
+	    
+		var i;
+		for(i = 0; i < 3; i++)
+		{
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() 
+			{
+				if (this.readyState == 4 && this.status == 200) 
+				{
+					var text = this.responseText;
+					//console.log(this.responseText);
+					var myObj = JSON.parse(this.responseText);
+					//console.log("#button" + i);
+					$("#button" + i).text(function()
+					{
+						
+						if(myObj.status == "Start")
+						{
+							//console.log("Equal Start");
+							return "stop";
+						}
+						else
+						{
+							//console.log("Equal Stop");
+							return "start";
+						}
+						
+					});
+				}
+			};
+			xhttp.open("GET", address[i] + "/status", false);
+			xhttp.send();
+		}
+}
+	
+function loadRules() {
+	setTimeout(function() {
+	
+	  var xhttp = new XMLHttpRequest();
+	  xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+		  var myObj = JSON.parse(this.responseText);
+		  
+		  $("#rules").html(function(){
+			var i, j;
+			var ret = "";
+			for(i = 0; i < myObj.length; i++)
+			{
+				ret = ret + "<p><b>" +  myObj[i].systemName + ":</b></p>";
+				for(j = 0; j < myObj[i].rules.length; j++)
+				{
+					ret = ret + "<p><code>" + myObj[i].rules[j] + "</code></p>";
+				}
+			}
+			return ret;
+		});
+	  
+		  //console.log(this.responseText);
+		}
+	  };
+	  
+	  xhttp.open("GET", "http://localhost:8474/auto/orchestration/rules", true);
+	  //xhttp.setRequestHeader('Origin','http://localhost:8474');
+	  //xhttp.setRequestHeader('Access-Control-Allow-Origin','*');
+
+	  xhttp.send();
+	  
+	  loadRules();
+	  
+	}, 2000);
+}
+
+function loadQueries() {
+	setTimeout(function() {
+	
+	  var xhttp = new XMLHttpRequest();
+	  xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+		  var myObj = JSON.parse(this.responseText);
+		  
+		  $("#queries").html(function(){
+			var i;
+			var ret = "";
+			for(i = 0; i < myObj.length; i++)
+			{
+				ret = ret + "<p><b>" +  myObj[i].name + ":</b></p>";
+				ret = ret + "<pre><code>" + myObj[i].query.replace(/</g, "&lt; ").replace(/</g, " &gt;") + "</code></pre>";
+			}
+			return ret;
+		});
+	  
+		  //console.log(this.responseText);
+		}
+	  };
+	  
+	  xhttp.open("GET", "http://localhost:8474/auto/orchestration/queries", true);
+	  //xhttp.setRequestHeader('Origin','http://localhost:8474');
+	  //xhttp.setRequestHeader('Access-Control-Allow-Origin','*');
+
+	  xhttp.send();
+	  
+	  loadRules();
+	  
+	}, 2000);
+}
+
+function UpdateTemperature0() {
+	setTimeout(function() {
+		
+		var i = 0;
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() 
+		{
+			if (this.readyState == 4 && this.status == 200) 
+			{
+				var text = this.responseText;
+				//console.log(this.responseText);
+				var myObj = JSON.parse(this.responseText);
+				
+				var celsius_value = myObj.e[0].v;
+				var kelvin_value = celsius_value + 273.15;
+				
+				//console.log("#button" + i);
+				$("#temp" + i).text(myObj.e[0].v);
+				$("#unit" + i).text(myObj.bu);
+				
+				if(currentTempIndex == i)
+				{
+					//$("#cTemp").text(kelvin_value + "  ( " + celsius_value + " °C )");
+					$("#cTemp").text(kelvin_value);
+					//$("#cUnit").text(myObj.bu);
+					$("#cProducer").text(producers[i]);
+				}
+			}
+		};
+		xhttp.open("GET", address[i], true);
+		xhttp.send();
+	  
+		UpdateTemperature0();
+	  
+	}, 2000);
+}
+
+function UpdateTemperature1() {
+	setTimeout(function() {
+		
+		var i = 1;
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() 
+		{
+			if (this.readyState == 4 && this.status == 200) 
+			{
+				var text = this.responseText;
+				//console.log(this.responseText);
+				var myObj = JSON.parse(this.responseText);
+				//console.log("#button" + i);
+				
+				var celsius_value = myObj.e[0].v;
+				var kelvin_value = celsius_value + 273.15;
+				
+				
+				$("#temp" + i).text(myObj.e[0].v);
+				$("#unit" + i).text(myObj.bu);
+				
+				if(currentTempIndex == i)
+				{
+					//$("#cTemp").text(kelvin_value + "  ( " + celsius_value + " °C )");
+					//$("#cUnit").text(myObj.bu);
+					$("#cTemp").text(kelvin_value);
+					$("#cProducer").text(producers[i]);
+				}
+			}
+		};
+		xhttp.open("GET", address[i], true);
+		xhttp.send();
+	  
+		UpdateTemperature1();
+	  
+	}, 2000);
+}
+
+function UpdateTemperature2() {
+	setTimeout(function() {
+		
+		var i = 2;
+		var xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() 
+		{
+			if (this.readyState == 4 && this.status == 200) 
+			{
+				var text = this.responseText;
+				//console.log(this.responseText);
+				var myObj = JSON.parse(this.responseText);
+				//console.log("#button" + i);
+				
+				var celsius_value = (myObj.e[0].v - 32)*5/9;
+				var kelvin_value = celsius_value + 273.15;
+				
+				$("#temp" + i).text(myObj.e[0].v + "  ( " + celsius_value + " °C )");
+				$("#unit" + i).text(myObj.bu);
+				
+				if(currentTempIndex == i)
+				{
+					//$("#cTemp").text(kelvin_value + "  ( " + celsius_value + " °C )");
+					//$("#cUnit").text(myObj.bu);
+					$("#cTemp").text(kelvin_value);
+					$("#cProducer").text(producers[i]);
+				}
+			}
+		};
+		xhttp.open("GET", address[i], true);
+		xhttp.send();
+	  
+		UpdateTemperature2();
+	  
+	}, 2000);
+}
+</script>
+<script>
+function openCity(evt, cityName) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("city");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+  }
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " w3-red";
+}
+</script>
+
+<script type="text/javascript"> 
+
+function getData(input_file) {
+    setTimeout(function() {
+	
+		var reader = new FileReader();
+
+
+		// file reading finished successfully
+		reader.addEventListener('load', function(e) {
+			var text = e.target.result;
+
+			// contents of the file
+			document.querySelector("#contents").innerText = text;
+			document.querySelector("#contents").style.display = 'block';
+
+			document.querySelector("#file-input-label").style.display = 'block'; 
+		});
+
+		// file reading failed
+		reader.addEventListener('error', function() {
+			console.log('Error : Failed to read file');
+		});
+		
+			// file read progress 
+		reader.addEventListener('progress', function(e) {
+	    if(e.lengthComputable == true) {
+	    	document.querySelector("#file-progress-percent").innerHTML = Math.floor((e.loaded/e.total)*100);
+	    	document.querySelector("#file-progress-percent").style.display = 'block';
+	    }
+	});
+
+		// read as text file
+		console.log("Reading file");
+		reader.readAsText(input_file);
+		
+		getData(input_file);
+	
+	}, 2000);
+	
+	
+}
+
+document.querySelector("#file-input").addEventListener('change', function() {
+	// files that user has chosen
+	//loadRules() ;
+	var all_files = this.files;
+	if(all_files.length == 0) {
+		alert('Error : No file selected');
+		return;
+	}
+
+	// first file selected by user
+	var file = all_files[0];
+
+	// Max 2 MB allowed
+	var max_size_allowed = 2*1024*1024
+	if(file.size > max_size_allowed) {
+		alert('Error : Exceeded size 2MB');
+		return;
+	}
+	
+	// file validation is successfull
+	// we will now read the file
+	getData(file);
+});
+
+
+</script>
+
+</body>
+</html>

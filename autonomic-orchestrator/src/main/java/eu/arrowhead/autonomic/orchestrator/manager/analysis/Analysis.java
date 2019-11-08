@@ -58,7 +58,10 @@ public class Analysis {
 	}
 	
 	
-	
+	public TreeMap<String, String> getAllQuries()
+	{
+		return (TreeMap<String, String>) this.queries.clone();
+	}
 	
 	private void UpdateQueries()
 	{
