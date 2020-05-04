@@ -4,6 +4,7 @@ import org.apache.jena.sys.JenaSystem;
 
 import eu.arrowhead.autonomic.orchestrator.manager.analysis.Analysis;
 import eu.arrowhead.autonomic.orchestrator.manager.execute.Execute;
+import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.Monitor;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.Plan;
 import no.prediktor.apis.demo.consumer.DemoConsumer;
@@ -49,6 +50,10 @@ public class App
 		
 		plan.start();
 		execute.start();
+		
+		
+		//KnowledgeBase.getInstance().start();
+		
 		
 		OrchestrationRegisterResource.plan = plan;
 		OrchestrationRegisterResource.analysis = analysis;

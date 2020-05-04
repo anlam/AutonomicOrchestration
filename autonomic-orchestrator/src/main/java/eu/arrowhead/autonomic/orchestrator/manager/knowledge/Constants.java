@@ -9,7 +9,10 @@ public class Constants {
 	
 	public static final String planQueriesDir = "./src/main/resources/queries/plan/";
 	
+	public static final String knowledgeBaseFileName = "./dataset.txt";
+	
 	public static final long MonitorWorkerInterval = 1000;
+	public static final long KnowledgeBaseWorkerInterval = 2000;
 	public static final long AnalysisWorkerInterval = 1000;
 	public static final long PlanWorkerInterval = 1000;
 	public static final long ExecuteWorkerInterval = 1000;

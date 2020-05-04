@@ -9,6 +9,9 @@
 
 package eu.arrowhead.autonomic.orchestrator;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
@@ -137,6 +140,25 @@ public class OrchestrationRegisterResource {
 		  
 	  }
 	  return Response.status(Status.OK).entity(queriesRequest).header("Access-Control-Allow-Origin", "*").build();
+  }
+  
+  
+  @GET
+  @Path("knowledge")
+  public Response getKnowledgeBase()
+  {
+	  String fileContext = "";
+	  
+      try
+      {
+    	  fileContext = new String ( Files.readAllBytes( Paths.get(Constants.knowledgeBaseFileName) ) );
+      } 
+      catch (IOException e) 
+      {
+          e.printStackTrace();
+      }
+	  
+	  return Response.status(Status.OK).entity(fileContext).header("Access-Control-Allow-Origin", "*").build();
   }
   
   //@PUT

@@ -31,15 +31,25 @@ import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.arrowhead.autonomic.orchestrator.manager.monitor.BaseConsumerWorker;
+import eu.arrowhead.autonomic.orchestrator.manager.monitor.MonitorWorker;
+
 public class KnowledgeBase {
 
 	private static KnowledgeBase instance;
 	
 	private ReentrantLock lock;
 	private static final Logger log = LoggerFactory.getLogger(KnowledgeBase.class );
+	
+	private KnowledgeBaseWorker knowledgeBaseWorker;
+	
+	
 	private KnowledgeBase()
 	{
 		lock =  new ReentrantLock();
+		
+		knowledgeBaseWorker = new KnowledgeBaseWorker(this, Constants.KnowledgeBaseWorkerInterval);
+		knowledgeBaseWorker.start();
 	}
 	
 	public static void main2(String[] args) {
@@ -112,7 +122,7 @@ public class KnowledgeBase {
 	
 	public static void main(String[] args) {
 		
-		String updateCurentTimeQuery = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
+		/*String updateCurentTimeQuery = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
 				 "prefix rdfs: <"+RDFS.getURI()+">\n" +
 				 "prefix rdf: <"+RDF.getURI()+">\n" +
 				 "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
@@ -130,12 +140,9 @@ public class KnowledgeBase {
 		
 		List<String> queries = new ArrayList<String>();
 		queries.add(updateCurentTimeQuery);
-		//queries.add(updateCurentTimeQuery2);
-		 
 		
-		//KnowledgeBase.getInstance().AddSensor("Device_9575530", "Service_9575530", "TopMiddle");
+		KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);*/
 		
-		KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);
 		KnowledgeBase.getInstance().WriteModelToFile("./dataset.ttl");
 
 	}
@@ -174,9 +181,18 @@ public class KnowledgeBase {
 			lock.unlock();
 		}
 	}
+
 	
+	public void WorkerProcess()
+	{
+		WriteModelToFile(Constants.knowledgeBaseFileName);
+		
+	}
 	
 	public void WriteModelToFile(String filename) {
+		
+		lock.lock();
+		
 		Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
 		dataset.begin(ReadWrite.WRITE);
 		try {
@@ -187,7 +203,11 @@ public class KnowledgeBase {
 			model.setNsPrefix(":", OntologyNames.BASE_URL);
 			model.setNsPrefix("rdfs", RDFS.uri);
 			model.setNsPrefix("xsd", XSD.NS);
-			model.write(new FileOutputStream(new File(filename)), "TTL");
+			
+			FileOutputStream newFile =  new FileOutputStream(new File(filename));
+			model.write(newFile, "TTL");
+			newFile.close();
+			
 
 			dataset.commit();
 		} catch (Exception e) {
@@ -195,7 +215,9 @@ public class KnowledgeBase {
 			System.err.println("Fail to WriteModelToFile: " + e.getMessage());
 			//e.printStackTrace();
 		} finally {
+			
 			dataset.end();
+			lock.unlock();
 
 		}
 	}
@@ -263,8 +285,8 @@ public class KnowledgeBase {
 			
 			  model.setNsPrefix("sosa", OntologyNames.SOSA_URL); model.setNsPrefix(":",
 			  OntologyNames.BASE_URL); model.setNsPrefix("rdfs", RDFS.uri);
-			  model.setNsPrefix("xsd", XSD.NS); model.write(new FileOutputStream(new
-			  File("./dataset.ttl")), "TTL" );
+			  model.setNsPrefix("xsd", XSD.NS); 
+			  //model.write(new FileOutputStream(new File("./dataset.txt")), "TTL" );
 			 
 			
 			

@@ -190,6 +190,7 @@ public class Plan {
 	public void start()
 	{
 		UpdateRuleFromKnowledgeBase();
+		//UpdateRules();
 		
 		planWorker.start();
 	}

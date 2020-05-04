@@ -91,8 +91,8 @@ text-align:center;
   
   <div id="London" class="w3-container w3-border city">
     <h2>Knowledge Base</h2>
-	<label for="file-input" id="file-input-label">Choose Text File</label>
-	<input type="file" id="file-input" accept="text/plain" />
+<!-- 	<label for="file-input" id="file-input-label">Choose Text File</label>
+	<input type="file" id="file-input" accept="text/plain" /> -->
 	<div id="file-progress-container"><span id="file-progress-percent"></span>% read</div>
 	<pre><code id="contents">Knowledge Base</code><pre>
   </div>
@@ -211,6 +211,8 @@ $( document ).ready(function() {
 	UpdateTemperature2();
 	getOrchestration();
 	updateButonLable();
+	
+	getData2();
 	
 	hightlightCurrentValue(0, currentTempIndex);
 	
@@ -537,72 +539,31 @@ function openCity(evt, cityName) {
 
 <script type="text/javascript"> 
 
-function getData(input_file) {
+function getData2() {
     setTimeout(function() {
 	
-		var reader = new FileReader();
-
-
-		// file reading finished successfully
-		reader.addEventListener('load', function(e) {
-			var text = e.target.result;
-
-			// contents of the file
-			document.querySelector("#contents").innerText = text;
-			document.querySelector("#contents").style.display = 'block';
-
-			document.querySelector("#file-input-label").style.display = 'block'; 
-		});
-
-		// file reading failed
-		reader.addEventListener('error', function() {
-			console.log('Error : Failed to read file');
-		});
+	 
+	 console.log("Reading knowledge");
+	 
+	  var xhttp = new XMLHttpRequest();
+	  xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {	  
 		
-			// file read progress 
-		reader.addEventListener('progress', function(e) {
-	    if(e.lengthComputable == true) {
-	    	document.querySelector("#file-progress-percent").innerHTML = Math.floor((e.loaded/e.total)*100);
-	    	document.querySelector("#file-progress-percent").style.display = 'block';
-	    }
-	});
-
-		// read as text file
-		console.log("Reading file");
-		reader.readAsText(input_file);
-		
-		getData(input_file);
+		  
+		  $("#contents").text(this.responseText);
+		  document.querySelector("#contents").style.display = 'block';
+		}
+	  };
+	  
+	  xhttp.open("GET", "http://localhost:8474/auto/orchestration/knowledge", true);
+	  xhttp.send();
+	  
+	  getData2();
 	
 	}, 2000);
 	
 	
 }
-
-document.querySelector("#file-input").addEventListener('change', function() {
-	// files that user has chosen
-	//loadRules() ;
-	var all_files = this.files;
-	if(all_files.length == 0) {
-		alert('Error : No file selected');
-		return;
-	}
-
-	// first file selected by user
-	var file = all_files[0];
-
-	// Max 2 MB allowed
-	var max_size_allowed = 2*1024*1024
-	if(file.size > max_size_allowed) {
-		alert('Error : Exceeded size 2MB');
-		return;
-	}
-	
-	// file validation is successfull
-	// we will now read the file
-	getData(file);
-});
-
-
 </script>
 
 </body>
