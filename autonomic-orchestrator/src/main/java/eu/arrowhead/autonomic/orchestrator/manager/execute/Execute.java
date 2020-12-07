@@ -69,7 +69,7 @@ public class Execute {
 			if(adaptPlan != null)
 			{
 				
-				if(adaptPlan.getStatus() == PlanStatus.NEW)
+				if(adaptPlan.getStatus() == PlanStatus.NEW) //|| adaptPlan.getStatus() == PlanStatus.SENT)
 				{
 					log.debug("Execute found adapation plan for: " + consumerName);
 					log.debug(adaptPlan.toString());

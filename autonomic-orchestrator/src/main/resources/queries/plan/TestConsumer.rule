@@ -7,11 +7,18 @@
 
 #[rule2: (?c rdf:type :Consumer) (?c :consumesService ?s1) (?s1  :hasState  :OfflineState) (?o1  sosa:madeBySensor  ?d1) (?o1  :hasUnit  ?u1) (?p1 :producesService ?s1) (?d1 :hasService ?s1)  (?d1 sosa:hasLocation ?l) (?d2 :hasService ?s2) (?o2  sosa:madeBySensor  ?d2) (?o2  :hasUnit  ?u2) equal(?u1,?u2)  (?d2  sosa:hasLocation ?l) (?s2  :hasState  :OnlineState) (?p2 :producesService ?s2)-> substituteService(?c, ?s1, ?p1, ?s2, ?p2) ]
 
-[rule3: (?c rdf:type :Consumer) (?c :consumesService ?s1) (?s1  :hasState  :OfflineState) (?o1  sosa:madeBySensor  ?d1) (?o1  :hasUnit  ?u1) (?p1 :producesService ?s1) (?d1 :hasService ?s1)  (?d1 sosa:hasLocation ?l) (?d2 :hasService ?s2) (?o2  sosa:madeBySensor  ?d2) (?o2  :hasUnit  ?u2) notEqual(?u1,?u2) (?d2  sosa:hasLocation ?l) (?s2  :hasState  :OnlineState) (?p2 :producesService ?s2)-> substituteService(?c, ?s1, ?p1, ?s2, ?p2) configure(?c, "unit", ?u2) ]
+#[rule3: (?c rdf:type :Consumer) (?c :consumesService ?s1) (?s1  :hasState  :OfflineState) (?o1  sosa:madeBySensor  ?d1) (?o1  :hasUnit  ?u1) (?p1 :producesService ?s1) (?d1 :hasService ?s1)  (?d1 sosa:hasLocation ?l) (?d2 :hasService ?s2) (?o2  sosa:madeBySensor  ?d2) (?o2  :hasUnit  ?u2) notEqual(?u1,?u2) (?d2  sosa:hasLocation ?l) (?s2  :hasState  :OnlineState) (?p2 :producesService ?s2)-> substituteService(?c, ?s1, ?p1, ?s2, ?p2) configure(?c, "unit", ?u2) ]
 
-[rule3: (?c rdf:type :Consumer) (?c :consumesService ?s1) (?s1  :hasState  :OnlineState) (?o1  sosa:madeBySensor  ?d1) (?o1  :hasUnit  ?u1) (?p1 :producesService ?s1) (?d1 :hasService ?s1)  (?d1 sosa:hasLocation ?l) 
+#[rule3: (?c rdf:type :Consumer) (?c :consumesService ?s1) (?s1  :hasState  :OnlineState) (?o1  sosa:madeBySensor  ?d1) (?o1  :hasUnit  ?u1) (?p1 :producesService ?s1) (?d1 :hasService ?s1)  (?d1 sosa:hasLocation ?l) 
 (?o1 sosa:hasSimpleResult ?result) equal(?u1, "fahrenheit") greaterThan(?result, 77)
 (?d2 :hasService ?s2) (?o2  sosa:madeBySensor  ?d2) (?o2  :hasUnit  ?u2) notEqual(?u1,?u2) (?d2  sosa:hasLocation ?l) (?s2  :hasState  :OnlineState) (?p2 :producesService ?s2)-> substituteService(?c, ?s1, ?p1, ?s2, ?p2) configure(?c, "unit", ?u2) ]
+
+
+#[rule3: (?c rdf:type :Consumer) (?c :consumesService ?s1) (?s1  :hasState  :OnlineState) (?o1  sosa:madeBySensor  ?d1) (?o1  :hasUnit  ?u1) (?p1 :producesService ?s1) (?d1 :hasService ?s1)  (?d1 sosa:hasLocation ?l) 
+(?o1 sosa:hasSimpleResult ?result) equal(?u1, "fahrenheit") greaterThan(?result, 77)
+(?d2 :hasService ?s2) (?o2  sosa:madeBySensor  ?d2) (?o2  :hasUnit  ?u2) notEqual(?u1,?u2) (?d2  sosa:hasLocation ?l) (?s2  :hasState  :OnlineState) (?p2 :producesService ?s2)-> substituteService(?c, ?s1, ?p1, ?s2, ?p2) configure(?c, "unit", ?u2) ]
+
+[rule4: (?o1  sosa:madeBySensor  ?d1)(?o1 sosa:hasSimpleResult ?t)(?o1 sosa:hasFeatureOfInterest  :Temperature) lessThan(?t, 20)(?o2  sosa:madeBySensor  ?d1)(?o2 sosa:hasSimpleResult ?h)(?o2 sosa:hasFeatureOfInterest  :Humidity ) greaterThan(?h, 35) ->  configure(:TestConsumer, "Temperature Too Low", ?o1) configure(:TestConsumer, "Humidity Too High", ?o2) ]
 
 
 

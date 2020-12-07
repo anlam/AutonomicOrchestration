@@ -25,7 +25,7 @@ sosa:Observation  a  rdfs:Class .
 
 :OnlineState  a  :ServiceState .
 
-:DateTimeNow  :hasValue  1588149096357 .
+:DateTimeNow  :hasValue  1602602234967 .
 
 sosa:FeatureOfInterest
         a       rdfs:Class .
@@ -51,9 +51,9 @@ sosa:FeatureOfInterest
         a                          sosa:Observation ;
         :hasUnit                   "celsius" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "21.774506366342987"^^xsd:double ;
+        sosa:hasSimpleResult       "21.718990592208222"^^xsd:double ;
         sosa:madeBySensor          :Device_IndoorTemperature ;
-        sosa:resultTime            1588149096870 .
+        sosa:resultTime            1602575212097 .
 
 :Device_IndoorTemperature
         a                 :SensorUnit ;
@@ -63,7 +63,7 @@ sosa:FeatureOfInterest
 :Service_IndoorTemperature
         a                      :Service ;
         :hasServiceDefinition  "IndoorTemperature" ;
-        :hasState              :OnlineState .
+        :hasState              :OfflineState .
 
 :InsecureTemperatureSensor
         a                 :Producer ;
@@ -86,7 +86,7 @@ sosa:FeatureOfInterest
 :Service_IndoorTemperature3
         a                      :Service ;
         :hasServiceDefinition  "IndoorTemperature3" ;
-        :hasState              :OnlineState .
+        :hasState              :OfflineState .
 
 :InsecureTemperatureSensor3
         a                 :Producer ;
@@ -101,21 +101,21 @@ sosa:FeatureOfInterest
         a                          sosa:Observation ;
         :hasUnit                   "celsius" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "21.513673727855622"^^xsd:double ;
+        sosa:hasSimpleResult       "21.38349505299183"^^xsd:double ;
         sosa:madeBySensor          :Device_IndoorTemperature2 ;
-        sosa:resultTime            1588144744068 .
+        sosa:resultTime            1602575212844 .
 
 :Observation_IndoorTemperature3
         a                          sosa:Observation ;
         :hasUnit                   "fahrenheit" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "105.87655130967711"^^xsd:double ;
+        sosa:hasSimpleResult       "107.1961353688669"^^xsd:double ;
         sosa:madeBySensor          :Device_IndoorTemperature3 ;
-        sosa:resultTime            1588149096562 .
+        sosa:resultTime            1602575212940 .
 
 :TestConsumer  a          :Consumer ;
-        :consumesService  :Service_IndoorTemperature3 ;
-        :hasJenaRule      :TestConsumer_rule1 ;
+        :consumesService  :Service_IndoorTemperature2 ;
+        :hasJenaRule      :TestConsumer_rule2 , :TestConsumer_rule1 ;
         :producesService  :TestConsumerOrchPush .
 
 :TestConsumerOrchPush
@@ -126,8 +126,422 @@ sosa:FeatureOfInterest
 :TestConsumerOrchPushOper
         :hasAddress  "http://localhost:8474/auto/orchestration/push" .
 
+:TestConsumer_rule2  :hasBody  "[ TestConsumer_rule2: (?c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#Consumer>) (?c <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#consumesService> ?s1) (?s1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasState> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#OnlineState>) (?o1 <http://www.w3.org/ns/sosa#madeBySensor> ?d1) (?o1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasUnit> ?u1) (?p1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#producesService> ?s1) (?d1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasService> ?s1) (?d1 <http://www.w3.org/ns/sosa#hasLocation> ?l) (?o1 <http://www.w3.org/ns/sosa#hasSimpleResult> ?result) equal(?u1 'fahrenheit') greaterThan(?result '77'^^http://www.w3.org/2001/XMLSchema#int) (?d2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasService> ?s2) (?o2 <http://www.w3.org/ns/sosa#madeBySensor> ?d2) (?o2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasUnit> ?u2) notEqual(?u1 ?u2) (?d2 <http://www.w3.org/ns/sosa#hasLocation> ?l) (?s2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasState> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#OnlineState>) (?p2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#producesService> ?s2) -> substituteService(?c ?s1 ?p1 ?s2 ?p2) configure(?c 'unit' ?u2) ]" .
+
 :TestConsumer_rule1  :hasBody  "[ TestConsumer_rule1: (?c rdf:type <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#Consumer>) (?c <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#consumesService> ?s1) (?s1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasState> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#OfflineState>) (?o1 <http://www.w3.org/ns/sosa#madeBySensor> ?d1) (?o1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasUnit> ?u1) (?p1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#producesService> ?s1) (?d1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasService> ?s1) (?d1 <http://www.w3.org/ns/sosa#hasLocation> ?l) (?d2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasService> ?s2) (?o2 <http://www.w3.org/ns/sosa#madeBySensor> ?d2) (?o2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasUnit> ?u2) notEqual(?u1 ?u2) (?d2 <http://www.w3.org/ns/sosa#hasLocation> ?l) (?s2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasState> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#OnlineState>) (?p2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#producesService> ?s2) -> substituteService(?c ?s1 ?p1 ?s2 ?p2) configure(?c 'unit' ?u2) ]" .
 
-:ANewConsumer  :hasJenaRule  :ANewConsumer_rule1 .
+:Observation_5028208_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "22.53"^^xsd:double ;
+        sosa:madeBySensor          :Device_5028208 ;
+        sosa:resultTime            1602602230000 .
 
-:ANewConsumer_rule1  :hasBody  "[ ANewConsumer_rule1: (?c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#Consumer>) (?c <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#consumesService> ?s1) (?s1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasState> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#OfflineState>) (?o1 <http://www.w3.org/ns/sosa#madeBySensor> ?d1) (?o1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasUnit> ?u1) (?p1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#producesService> ?s1) (?d1 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasService> ?s1) (?d1 <http://www.w3.org/ns/sosa#hasLocation> ?l) (?d2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasService> ?s2) (?o2 <http://www.w3.org/ns/sosa#madeBySensor> ?d2) (?o2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasUnit> ?u2) notEqual(?u1 ?u2) (?d2 <http://www.w3.org/ns/sosa#hasLocation> ?l) (?s2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#hasState> <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#OnlineState>) (?p2 <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#producesService> ?s2) -> substituteService(?c ?s1 ?p1 ?s2 ?p2) configure(?c 'unit' ?u2) ]" .
+:Observation_5028208_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "31"^^xsd:double ;
+        sosa:madeBySensor          :Device_5028208 ;
+        sosa:resultTime            1602602230000 .
+
+:Observation_5028208_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102320"^^xsd:double ;
+        sosa:madeBySensor          :Device_5028208 ;
+        sosa:resultTime            1602602230000 .
+
+:Observation_5028208_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-967, -335, 164)" ;
+        sosa:madeBySensor          :Device_5028208 ;
+        sosa:resultTime            1602602230000 .
+
+:Observation_8900302_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "19.17"^^xsd:double ;
+        sosa:madeBySensor          :Device_8900302 ;
+        sosa:resultTime            1602602227000 .
+
+:Observation_8900302_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "39"^^xsd:double ;
+        sosa:madeBySensor          :Device_8900302 ;
+        sosa:resultTime            1602602227000 .
+
+:Observation_8900302_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102273"^^xsd:double ;
+        sosa:madeBySensor          :Device_8900302 ;
+        sosa:resultTime            1602602227000 .
+
+:Observation_8900302_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-704, 58, -734)" ;
+        sosa:madeBySensor          :Device_8900302 ;
+        sosa:resultTime            1602602227000 .
+
+:Observation_9335843_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "15.47"^^xsd:double ;
+        sosa:madeBySensor          :Device_9335843 ;
+        sosa:resultTime            1602602225000 .
+
+:Observation_9335843_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "54"^^xsd:double ;
+        sosa:madeBySensor          :Device_9335843 ;
+        sosa:resultTime            1602602225000 .
+
+:Observation_9335843_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102523"^^xsd:double ;
+        sosa:madeBySensor          :Device_9335843 ;
+        sosa:resultTime            1602602225000 .
+
+:Observation_9335843_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-593, 746, 402)" ;
+        sosa:madeBySensor          :Device_9335843 ;
+        sosa:resultTime            1602602225000 .
+
+:Observation_9575530_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "22.61"^^xsd:double ;
+        sosa:madeBySensor          :Device_9575530 ;
+        sosa:resultTime            1602602231000 .
+
+:Observation_9575530_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "32"^^xsd:double ;
+        sosa:madeBySensor          :Device_9575530 ;
+        sosa:resultTime            1602602231000 .
+
+:Observation_9575530_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102372"^^xsd:double ;
+        sosa:madeBySensor          :Device_9575530 ;
+        sosa:resultTime            1602602231000 .
+
+:Observation_9575530_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(544, -28, 848)" ;
+        sosa:madeBySensor          :Device_9575530 ;
+        sosa:resultTime            1602602231000 .
+
+:Observation_9772819_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "22.52"^^xsd:double ;
+        sosa:madeBySensor          :Device_9772819 ;
+        sosa:resultTime            1602602228000 .
+
+:Observation_9772819_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "32"^^xsd:double ;
+        sosa:madeBySensor          :Device_9772819 ;
+        sosa:resultTime            1602602228000 .
+
+:Observation_9772819_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102372"^^xsd:double ;
+        sosa:madeBySensor          :Device_9772819 ;
+        sosa:resultTime            1602602228000 .
+
+:Observation_9772819_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-32, 42, 1011)" ;
+        sosa:madeBySensor          :Device_9772819 ;
+        sosa:resultTime            1602602228000 .
+
+:Observation_11565686_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "22.51"^^xsd:double ;
+        sosa:madeBySensor          :Device_11565686 ;
+        sosa:resultTime            1602602224000 .
+
+:Observation_11565686_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "31"^^xsd:double ;
+        sosa:madeBySensor          :Device_11565686 ;
+        sosa:resultTime            1602602224000 .
+
+:Observation_11565686_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102401"^^xsd:double ;
+        sosa:madeBySensor          :Device_11565686 ;
+        sosa:resultTime            1602602224000 .
+
+:Observation_11565686_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-233, 672, 727)" ;
+        sosa:madeBySensor          :Device_11565686 ;
+        sosa:resultTime            1602602224000 .
+
+:Observation_3244631_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "19.52"^^xsd:double ;
+        sosa:madeBySensor          :Device_3244631 ;
+        sosa:resultTime            1602602229000 .
+
+:Observation_3244631_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "37"^^xsd:double ;
+        sosa:madeBySensor          :Device_3244631 ;
+        sosa:resultTime            1602602229000 .
+
+:Observation_3244631_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102492"^^xsd:double ;
+        sosa:madeBySensor          :Device_3244631 ;
+        sosa:resultTime            1602602229000 .
+
+:Observation_3244631_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-112, 713, 762)" ;
+        sosa:madeBySensor          :Device_3244631 ;
+        sosa:resultTime            1602602229000 .
+
+:Observation_1199791_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "19.25"^^xsd:double ;
+        sosa:madeBySensor          :Device_1199791 ;
+        sosa:resultTime            1602602233000 .
+
+:Observation_1199791_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "37"^^xsd:double ;
+        sosa:madeBySensor          :Device_1199791 ;
+        sosa:resultTime            1602602233000 .
+
+:Observation_1199791_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102478"^^xsd:double ;
+        sosa:madeBySensor          :Device_1199791 ;
+        sosa:resultTime            1602602233000 .
+
+:Observation_1199791_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-210, 1009, 121)" ;
+        sosa:madeBySensor          :Device_1199791 ;
+        sosa:resultTime            1602602233000 .
+
+:Observation_2999285_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "22.6"^^xsd:double ;
+        sosa:madeBySensor          :Device_2999285 ;
+        sosa:resultTime            1602602229000 .
+
+:Observation_2999285_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "34"^^xsd:double ;
+        sosa:madeBySensor          :Device_2999285 ;
+        sosa:resultTime            1602602229000 .
+
+:Observation_2999285_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102247"^^xsd:double ;
+        sosa:madeBySensor          :Device_2999285 ;
+        sosa:resultTime            1602602229000 .
+
+:Observation_2999285_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-51, -5, 1044)" ;
+        sosa:madeBySensor          :Device_2999285 ;
+        sosa:resultTime            1602602229000 .
+
+:Observation_77741_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "22.57"^^xsd:double ;
+        sosa:madeBySensor          :Device_77741 ;
+        sosa:resultTime            1602602233000 .
+
+:Observation_77741_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "31"^^xsd:double ;
+        sosa:madeBySensor          :Device_77741 ;
+        sosa:resultTime            1602602233000 .
+
+:Observation_77741_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102297"^^xsd:double ;
+        sosa:madeBySensor          :Device_77741 ;
+        sosa:resultTime            1602602233000 .
+
+:Observation_77741_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(340, -274, 978)" ;
+        sosa:madeBySensor          :Device_77741 ;
+        sosa:resultTime            1602602233000 .
+
+:Observation_8116322_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "20.16"^^xsd:double ;
+        sosa:madeBySensor          :Device_8116322 ;
+        sosa:resultTime            1602602224000 .
+
+:Observation_8116322_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "37"^^xsd:double ;
+        sosa:madeBySensor          :Device_8116322 ;
+        sosa:resultTime            1602602224000 .
+
+:Observation_8116322_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102385"^^xsd:double ;
+        sosa:madeBySensor          :Device_8116322 ;
+        sosa:resultTime            1602602224000 .
+
+:Observation_8116322_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-34, -42, 1027)" ;
+        sosa:madeBySensor          :Device_8116322 ;
+        sosa:resultTime            1602602224000 .
+
+:Observation_3665251_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "22.84"^^xsd:double ;
+        sosa:madeBySensor          :Device_3665251 ;
+        sosa:resultTime            1602602232000 .
+
+:Observation_3665251_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "31"^^xsd:double ;
+        sosa:madeBySensor          :Device_3665251 ;
+        sosa:resultTime            1602602232000 .
+
+:Observation_3665251_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102409"^^xsd:double ;
+        sosa:madeBySensor          :Device_3665251 ;
+        sosa:resultTime            1602602232000 .
+
+:Observation_3665251_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-500, -483, 756)" ;
+        sosa:madeBySensor          :Device_3665251 ;
+        sosa:resultTime            1602602232000 .
+
+:Observation_14672725_Temperature
+        a                          sosa:Observation ;
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "19.2"^^xsd:double ;
+        sosa:madeBySensor          :Device_14672725 ;
+        sosa:resultTime            1602602228000 .
+
+:Observation_14672725_Humidity
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "37"^^xsd:double ;
+        sosa:madeBySensor          :Device_14672725 ;
+        sosa:resultTime            1602602228000 .
+
+:Observation_14672725_Pressure
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "102475"^^xsd:double ;
+        sosa:madeBySensor          :Device_14672725 ;
+        sosa:resultTime            1602602228000 .
+
+:Observation_14672725_Acceleration
+        a                          sosa:Observation ;
+        :hasUnit                   "m" ;
+        sosa:hasFeatureOfInterest  :Acceleration ;
+        sosa:hasSimpleResult       "(-817, 438, -417)" ;
+        sosa:madeBySensor          :Device_14672725 ;
+        sosa:resultTime            1602602228000 .

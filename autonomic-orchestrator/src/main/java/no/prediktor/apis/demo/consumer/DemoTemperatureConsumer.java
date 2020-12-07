@@ -169,7 +169,7 @@ public class DemoTemperatureConsumer extends BaseConsumerWorker {
 	    	
 	    	TemperatureReadout readout = getResponse.readEntity(TemperatureReadout.class);
 	    	
-	    	 monitor.AddObservation("Observation_" + serviceName, "Device_" + serviceName, (long) readout.getE().get(0).getT(), String.valueOf(readout.getE().get(0).getV()), "Temperature", readout.getBu());
+	    	 monitor.AddObservation("Observation_" + serviceName, "Device_" + serviceName, (long) readout.getE().get(0).getT(), String.valueOf(readout.getE().get(0).getV()), "Temperature", readout.getBu(), "double");
 
 	    	 
 	      //System.out.println("Provider Response payload: " + Utility.toPrettyJson(null, readout));

@@ -5,8 +5,8 @@
 
 
 {
-	"systemName": "TestConsumer",
-	"rules": [ "TestConsumer_rule2"]
+	"systemName": "ANewConsumer",
+	"rules": [ "ANewConsumer_rule1"]
 	
 }
 

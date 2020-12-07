@@ -201,7 +201,7 @@ public class Plan {
 	}
 	
 	public void WorkerProcess() {
-		//UpdateRules();
+		UpdateRules();
 		StartReasoning();
 	}
 	

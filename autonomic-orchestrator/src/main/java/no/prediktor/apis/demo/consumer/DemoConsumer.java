@@ -179,7 +179,7 @@ public class DemoConsumer extends BaseConsumerWorker {
 		  {
 			  if(item.getName().contains(DeviceID + ".temperature"))
 			  {
-				  monitor.AddObservation("Observation_" + DeviceID, "Device_" + DeviceID, item.getVQT().getTimestamp().getTime(), item.getVQT().getValue(), "Temperature", "celsius");
+				  monitor.AddObservation("Observation_" + DeviceID, "Device_" + DeviceID, item.getVQT().getTimestamp().getTime(), item.getVQT().getValue(), "Temperature", "celsius", "double");
 			  }
 				 
 		  }
