@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
-import no.prediktor.apis.demo.consumer.DemoConsumer;
+//import no.prediktor.apis.demo.consumer.DemoConsumer;
 
 public class Monitor {
 
@@ -60,10 +60,12 @@ public class Monitor {
 		
 		Monitor monitor = new Monitor();
 		
-		DemoConsumer demo1 = new DemoConsumer("3244631");
-		DemoConsumer demo2 = new DemoConsumer("2999285");
-		monitor.AddConsumer(demo1);
-		monitor.AddConsumer(demo2);
+		
+		
+//		DemoConsumer demo1 = new DemoConsumer("3244631");
+//		DemoConsumer demo2 = new DemoConsumer("2999285");
+//		monitor.AddConsumer(demo1);
+//		monitor.AddConsumer(demo2);
 		
 		
 		

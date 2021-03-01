@@ -16,14 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+//import javax.ws.rs.GET;
+//import javax.ws.rs.POST;
+//import javax.ws.rs.PUT;
+//import javax.ws.rs.Path;
+//import javax.ws.rs.Produces;
+//import javax.ws.rs.core.MediaType;
+//import javax.ws.rs.core.Response;
+//import javax.ws.rs.core.Response.Status;
 
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.update.UpdateFactory;
@@ -32,6 +32,15 @@ import org.apache.jena.util.PrintUtil;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -48,9 +57,9 @@ import eu.arrowhead.autonomic.orchestrator.manager.plan.model.OrchestrationRuleD
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.OrchestrationRuleRegister;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.PlanStatus;
 
-
-@Path(Constants.OrchestrationRegisterURI)
-@Produces(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(Constants.OrchestrationRegisterURI)
+//@Produces(MediaType.APPLICATION_JSON)
 //REST service example
 public class OrchestrationRegisterResource {
 
@@ -58,13 +67,12 @@ public class OrchestrationRegisterResource {
   public static Plan plan;
   public static Analysis analysis;
 
-  @GET
-  @Path("/")
-  public Response getAllRule() {
-	  
+  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody public List<OrchestrationRuleRegister> getAllRule() {
+	  System.out.print("receive request");
 	  if(plan == null)
 	  {
-		  return Response.status(Status.BAD_REQUEST).build();
+		  return null;
 	  }
 	  
 	  List<OrchestrationRuleRegister> ret = new ArrayList<OrchestrationRuleRegister>();
@@ -81,16 +89,15 @@ public class OrchestrationRegisterResource {
 		  ret.add(orchRe);
 	  }
 	   
-	  return Response.status(Status.OK).header("Access-Control-Allow-Origin", "*").entity(ret).build();
+	  return ret;
   }
   
-  @GET
-  @Path("rules")
-  public Response getAllRule2() {
-	  
+  @GetMapping(path = "rules", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody public List<OrchestrationRuleRegister> getAllRule2() {
+	  System.out.println(plan);
 	  if(plan == null)
 	  {
-		  return Response.status(Status.BAD_REQUEST).build();
+		  return null;
 	  }
 	  
 	  List<OrchestrationRuleRegister> ret = new ArrayList<OrchestrationRuleRegister>();
@@ -118,12 +125,11 @@ public class OrchestrationRegisterResource {
 		  ret.add(orchRe);
 	  }
 	   
-	  return Response.status(Status.OK).entity(ret).header("Access-Control-Allow-Origin", "*").build();
+	  return ret;
   }
   
-  @GET
-  @Path("queries")
-  public Response getAllQueries() {
+  @GetMapping(path = "queries", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody public List<AnalysisQueryRequest> getAllQueries() {
 	  TreeMap<String, String> queries = analysis.getAllQuries();
 	  
 	  List<AnalysisQueryRequest> queriesRequest = new ArrayList<AnalysisQueryRequest>();
@@ -139,13 +145,12 @@ public class OrchestrationRegisterResource {
 		  queriesRequest.add(q);
 		  
 	  }
-	  return Response.status(Status.OK).entity(queriesRequest).header("Access-Control-Allow-Origin", "*").build();
+	  return queriesRequest;
   }
   
   
-  @GET
-  @Path("knowledge")
-  public Response getKnowledgeBase()
+  @GetMapping(path = "knowledge", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody public String getKnowledgeBase()
   {
 	  String fileContext = "";
 	  
@@ -158,22 +163,21 @@ public class OrchestrationRegisterResource {
           e.printStackTrace();
       }
 	  
-	  return Response.status(Status.OK).entity(fileContext).header("Access-Control-Allow-Origin", "*").build();
+	  return fileContext;
   }
   
   //@PUT
-  @POST
-  @Path("register")
-  public Response updateRule(OrchestrationRuleRegister rules) {
+  @PostMapping(path = "register", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody public OrchestrationRuleRegister updateRule(@RequestBody OrchestrationRuleRegister rules) {
 	  
 	  OrchestrationRuleRegister updatedForm = null;
 	  if(plan == null)
 	  {
-		  return Response.status(Status.BAD_REQUEST).build();
+		  return null;
 	  }
 	  List<Rule> updatedRules = plan.RegisterRules(rules);
 	  if(updatedRules == null || updatedRules.isEmpty() ) 
-		  return Response.status(Status.BAD_REQUEST).build();
+		  return null;
 	  
 	  updatedForm = new OrchestrationRuleRegister();
 	  updatedForm.setSystemName(rules.getSystemName());
@@ -183,28 +187,21 @@ public class OrchestrationRegisterResource {
 	  updatedForm.setRules(rulesList);
 	  
 	    //Return a response with Accepted status code
-	    return Response.status(Status.OK).header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Methods", "*")
-				    .header("Access-Control-Allow-Headers", "*")
-				    .header("Access-Control-Max-Age", "86400").entity(updatedForm).build();
+	    return updatedForm;
 	  }
 	  
   //@PUT
-  @POST
-  @Path("delete")
-  public Response deleteRule(OrchestrationRuleDelete rules)
+  @DeleteMapping(path = "delete")
+  public void deleteRule(OrchestrationRuleDelete rules)
   {
 	  if(plan == null)
 	  {
-		  return Response.status(Status.BAD_REQUEST).header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Methods", "GET, POST, PUT").build();
+		  return ;
 	  }
 	  boolean ret =  plan.deleteRules(rules);
 	  if(!ret)
-		  return Response.status(Status.BAD_REQUEST).header("Access-Control-Allow-Origin", "*").header("Access-Control-Allow-Methods", "GET, POST, PUT").build();
+		  return ;
 	  
-	  return Response.status(Status.OK).header("Access-Control-Allow-Origin", "*")
-			  						    .header("Access-Control-Allow-Methods", "*")
-			  						    .header("Access-Control-Allow-Headers", "*")
-			  						    .header("Access-Control-Max-Age", "86400").build();
   }
   
 	/*
@@ -214,10 +211,8 @@ public class OrchestrationRegisterResource {
 	 * null in the database (overriding existing data). PATCH requests are used for
 	 * partial updates.
 	 */
-	@PUT
-	//@POST
-	@Path("push")
-	public Response sendOrchestrationResponse(AdaptationPlan adaptation) {
+  @PutMapping(path = "push", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody public String sendOrchestrationResponse(@RequestBody AdaptationPlan adaptation) {
 		/*
 		 * Car carFromTheDatabase = cars.get(id); // Throw an exception if the car with
 		 * the specified ID does not exist if (carFromTheDatabase != null) { throw new
@@ -244,14 +239,13 @@ public class OrchestrationRegisterResource {
 		System.out.println("Sending response: ");
 		System.out.println(sValue);
 		
-		return Response.status(Status.OK).header("Access-Control-Allow-Origin", "*").entity(sValue).build();
+		return sValue;
 	}
 	
 	
 	private static AdaptationPlan sentAdapat = null;
-	@GET
-	@Path("getSentAdapations")
-	public Response sentAdapationResponse() {
+	@GetMapping(path = "getSentAdapations")
+	@ResponseBody public String sentAdapationResponse() {
 		String sValue = "";
 		if(sentAdapat != null)
 		{
@@ -260,7 +254,7 @@ public class OrchestrationRegisterResource {
 			sentAdapat = null;
 		}
 		
-		return Response.status(Status.OK).header("Access-Control-Allow-Origin", "*").entity(sValue).build();
+		return sValue;
 	}
 	
 	

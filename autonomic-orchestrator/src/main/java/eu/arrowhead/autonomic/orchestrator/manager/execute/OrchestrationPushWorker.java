@@ -19,15 +19,19 @@ public class OrchestrationPushWorker implements Runnable {
 	private String name = "OrchestrationPushWorker";
 	private String consumerName;
 	private String consumerURL;
+	private int consumerPort;
+	private String consumerPath;
 	private AdaptationPlan adaptationPlan;
 	private Plan plan;
 	
-	public OrchestrationPushWorker(Execute ex, Plan plan, String name, AdaptationPlan adaptPlan, String url ) 
+	public OrchestrationPushWorker(Execute ex, Plan plan, String name, AdaptationPlan adaptPlan, String url, int port, String path) 
 	{
 		this.execute = ex;
 		this.name = this.name + "_" + name;
 		this.consumerName = name;
 		this.consumerURL = url;
+		this.consumerPort = port;
+		this.consumerPath = path;
 		this.adaptationPlan = adaptPlan;
 		this.plan = plan;
 	}
@@ -43,7 +47,7 @@ public class OrchestrationPushWorker implements Runnable {
 
 		System.out.println("OrchestrationPushWorker Sending orchestratin to: " + consumerName);
 		AutonomicOrchestrationPushService pushService = new AutonomicOrchestrationPushConsumerREST_WS(consumerName,
-				consumerURL);
+				consumerURL, consumerPort, consumerPath);
 		plan.UpdateAdaptationPlanStatus(consumerName, PlanStatus.SENDING);
 
 		AdaptationPlan response = pushService.sendApdationPlan(adaptationPlan);

@@ -1,20 +1,27 @@
 package eu.arrowhead.autonomic.orchestrator;
 
 import org.apache.jena.sys.JenaSystem;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 import eu.arrowhead.autonomic.orchestrator.manager.analysis.Analysis;
 import eu.arrowhead.autonomic.orchestrator.manager.execute.Execute;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
+import eu.arrowhead.autonomic.orchestrator.manager.monitor.DummyConsumer;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.Monitor;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.Plan;
-import no.hiof.tellu.demo.consumer.NewMQTTClient;
-import no.prediktor.apis.demo.consumer.DemoConsumer;
-import no.prediktor.apis.demo.consumer.DemoTemperatureConsumer;
+//import no.hiof.tellu.demo.consumer.NewMQTTClient;
+//import no.prediktor.apis.demo.consumer.DemoConsumer;
+//import no.prediktor.apis.demo.consumer.DemoTemperatureConsumer;
+import eu.arrowhead.common.CommonConstants;
 
 /**
  * Hello world!
  *
  */
+@SpringBootApplication
+@ComponentScan(basePackages = {CommonConstants.BASE_PACKAGE})
 public class App 
 {
     public static void main( String[] args )
@@ -40,9 +47,11 @@ public class App
 		
 		//monitor.AddConsumer(demo2);
 		try {
-			NewMQTTClient telluMonitor = new NewMQTTClient(null, null);
-			telluMonitor.initialize();
-			monitor.AddConsumer(telluMonitor);
+//			DummyConsumer dummy = new DummyConsumer("robodk", "data_consumer");
+//			monitor.AddConsumer(dummy);
+//			NewMQTTClient telluMonitor = new NewMQTTClient(null, null);
+//			telluMonitor.initialize();
+//			monitor.AddConsumer(telluMonitor);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -68,6 +77,6 @@ public class App
 		OrchestrationRegisterResource.analysis = analysis;
 		new OrchestrationRegisterProvider();
 		
-		
+		SpringApplication.run(App.class, args);
     }
 }

@@ -20,9 +20,13 @@ public class Constants {
 	public static final String OrchestrationPushServiceDefinition = "AutonomicOrchestrationPush";
 	public static final String OrchestrationRegisterServiceDefinition = "AutonomicOrchestrationRegister";
 	public static final String AutonomicOrchestrationName = "AutonomicOrchestrationSystem";
-	public static final int OrchestrationRegisterPort = 8474;
+	public static final int OrchestrationRegisterPort = 8461;
 	public static final String OrchestrationRegisterURI = "auto/orchestration";
 	
 	public static final int SubstitutionParameterSize = 6;
 	public static final int ConfigureParameterSize = 4;
+	
+	public static final String INTERFACE_SECURE = "HTTPS-SECURE-JSON";
+	public static final String INTERFACE_INSECURE = "HTTP-INSECURE-JSON";
+	public static final String HTTP_METHOD = "http-method";
 }
