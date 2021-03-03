@@ -16,15 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-//import javax.ws.rs.GET;
-//import javax.ws.rs.POST;
-//import javax.ws.rs.PUT;
-//import javax.ws.rs.Path;
-//import javax.ws.rs.Produces;
-//import javax.ws.rs.core.MediaType;
-//import javax.ws.rs.core.Response;
-//import javax.ws.rs.core.Response.Status;
-
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
@@ -58,7 +49,7 @@ import eu.arrowhead.autonomic.orchestrator.manager.plan.model.OrchestrationRuleR
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.PlanStatus;
 
 @RestController
-@RequestMapping(Constants.OrchestrationRegisterURI)
+//@RequestMapping(Constants.OrchestrationRegisterURI)
 //@Produces(MediaType.APPLICATION_JSON)
 //REST service example
 public class OrchestrationRegisterResource {
@@ -67,7 +58,7 @@ public class OrchestrationRegisterResource {
   public static Plan plan;
   public static Analysis analysis;
 
-  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(path = Constants.OrchestrationGetAllRulesURI, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody public List<OrchestrationRuleRegister> getAllRule() {
 	  System.out.print("receive request");
 	  if(plan == null)
@@ -92,7 +83,7 @@ public class OrchestrationRegisterResource {
 	  return ret;
   }
   
-  @GetMapping(path = "rules", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(path = Constants.OrchestrationGetAllRules2URI, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody public List<OrchestrationRuleRegister> getAllRule2() {
 	  System.out.println(plan);
 	  if(plan == null)
@@ -128,7 +119,7 @@ public class OrchestrationRegisterResource {
 	  return ret;
   }
   
-  @GetMapping(path = "queries", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(path = Constants.OrchestrationGetAllQueriesURI, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody public List<AnalysisQueryRequest> getAllQueries() {
 	  TreeMap<String, String> queries = analysis.getAllQuries();
 	  
@@ -149,7 +140,7 @@ public class OrchestrationRegisterResource {
   }
   
   
-  @GetMapping(path = "knowledge", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(path = Constants.OrchestrationGetAllKnowledgeURI, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody public String getKnowledgeBase()
   {
 	  String fileContext = "";
@@ -167,7 +158,7 @@ public class OrchestrationRegisterResource {
   }
   
   //@PUT
-  @PostMapping(path = "register", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(path = Constants.OrchestrationRegisterURI, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody public OrchestrationRuleRegister updateRule(@RequestBody OrchestrationRuleRegister rules) {
 	  
 	  OrchestrationRuleRegister updatedForm = null;
@@ -191,7 +182,7 @@ public class OrchestrationRegisterResource {
 	  }
 	  
   //@PUT
-  @DeleteMapping(path = "delete")
+  @DeleteMapping(path = Constants.OrchestrationDeleteURI)
   public void deleteRule(OrchestrationRuleDelete rules)
   {
 	  if(plan == null)
@@ -211,7 +202,7 @@ public class OrchestrationRegisterResource {
 	 * null in the database (overriding existing data). PATCH requests are used for
 	 * partial updates.
 	 */
-  @PutMapping(path = "push", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(path = Constants.OrchestrationPushURI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody public String sendOrchestrationResponse(@RequestBody AdaptationPlan adaptation) {
 		/*
 		 * Car carFromTheDatabase = cars.get(id); // Throw an exception if the car with
@@ -244,7 +235,7 @@ public class OrchestrationRegisterResource {
 	
 	
 	private static AdaptationPlan sentAdapat = null;
-	@GetMapping(path = "getSentAdapations")
+	@GetMapping(path = Constants.OrchestrationGetURI)
 	@ResponseBody public String sentAdapationResponse() {
 		String sValue = "";
 		if(sentAdapat != null)

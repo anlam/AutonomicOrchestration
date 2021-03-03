@@ -96,7 +96,7 @@ public class Execute {
 				 "where { " +
 				 // "?c rdf:type :Consumer . \n" +
 				 "?c :producesService ?s . \n" +
-				 "?s :hasServiceDefinition \"" +  Constants.OrchestrationPushServiceDefinition + "\" . \n" +
+				 "?s :hasServiceDefinition \"" +  Constants.OrchestrationPushDefinition + "\" . \n" +
 				 "?s :hasOperation ?o . \n" +
 				 "?o :hasAddress ?a . \n" +
 				 "}";
