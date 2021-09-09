@@ -34,150 +34,186 @@ import eu.arrowhead.common.exception.ArrowheadException;
 
 @Component
 public class ProviderApplicationInitListener extends ApplicationInitListener {
-	
-	//=================================================================================================
-	// members
-	
-	@Autowired
-	private ArrowheadService arrowheadService;
-	
-	@Autowired
-	private ProviderSecurityConfig providerSecurityConfig;
-	
-	@Value(ClientCommonConstants.$TOKEN_SECURITY_FILTER_ENABLED_WD)
-	private boolean tokenSecurityFilterEnabled;
-	
-	@Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
-	private boolean sslEnabled;
-	
-	@Value(ClientCommonConstants.$CLIENT_SYSTEM_NAME)
-	private String mySystemName;
-	
-	@Value(ClientCommonConstants.$CLIENT_SERVER_ADDRESS_WD)
-	private String mySystemAddress;
-	
-	@Value(ClientCommonConstants.$CLIENT_SERVER_PORT_WD)
-	private int mySystemPort;
-	
-	private final Logger logger = LogManager.getLogger(ProviderApplicationInitListener.class);
-	
-	//=================================================================================================
-	// methods
-	
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	protected void customInit(final ContextRefreshedEvent event) {
 
-		//Checking the availability of necessary core systems
-		checkCoreSystemReachability(CoreSystem.SERVICE_REGISTRY);
-		if (sslEnabled && tokenSecurityFilterEnabled) {
-			checkCoreSystemReachability(CoreSystem.AUTHORIZATION);			
+    // =================================================================================================
+    // members
 
-			//Initialize Arrowhead Context
-			arrowheadService.updateCoreServiceURIs(CoreSystem.AUTHORIZATION);			
+    @Autowired
+    private ArrowheadService arrowheadService;
 
-			setTokenSecurityFilter();
-		}  else {
-			logger.info("TokenSecurityFilter in not active");
-		}
-		
-		
-		//Register services into ServiceRegistry
-		//Register each APIs
-		//@Get all rules
-		final ServiceRegistryRequestDTO serviceRegistryRequest_1 = createServiceRegistryRequest(Constants.OrchestrationGetAllRulesDefinition, Constants.OrchestrationGetAllRulesURI, HttpMethod.GET);
-		arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_1);
-		
-		//@Get all rules 2
-		final ServiceRegistryRequestDTO serviceRegistryRequest_2 = createServiceRegistryRequest(Constants.OrchestrationGetAllRules2Definition, Constants.OrchestrationGetAllRules2URI, HttpMethod.GET);
-		arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_2);
-		
-		//@Get all queries
-		final ServiceRegistryRequestDTO serviceRegistryRequest_3 = createServiceRegistryRequest(Constants.OrchestrationGetAllQueriesDefinition, Constants.OrchestrationGetAllQueriesURI, HttpMethod.GET);
-		arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_3);
-		
-		//@Get all knowledge
-		final ServiceRegistryRequestDTO serviceRegistryRequest_4 = createServiceRegistryRequest(Constants.OrchestrationGetAllKnowledgeDefinition, Constants.OrchestrationGetAllKnowledgeURI, HttpMethod.GET);
-		arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_4);
-		
-		//@Post register 
-		final ServiceRegistryRequestDTO serviceRegistryRequest_5 = createServiceRegistryRequest(Constants.OrchestrationRegisterDefinition, Constants.OrchestrationRegisterURI, HttpMethod.POST);
-		arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_5);
-		
-		//@Delete register 
-		final ServiceRegistryRequestDTO serviceRegistryRequest_6 = createServiceRegistryRequest(Constants.OrchestrationDeleteDefinition, Constants.OrchestrationDeleteURI, HttpMethod.DELETE);
-		arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_6);
-		
-		//@Put Orchestration Response  
-		final ServiceRegistryRequestDTO serviceRegistryRequest_7 = createServiceRegistryRequest(Constants.OrchestrationPushDefinition, Constants.OrchestrationPushURI, HttpMethod.PUT);
-		arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_7);
-		
-		//@Get Orchestration Response  
-		final ServiceRegistryRequestDTO serviceRegistryRequest_8 = createServiceRegistryRequest(Constants.OrchestrationGetDefinition, Constants.OrchestrationGetURI, HttpMethod.GET);
-		arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_8);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	@Override
-	public void customDestroy() {
-		arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllRulesDefinition);
-		arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllRules2Definition);
-		arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllQueriesDefinition);
-		arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllKnowledgeDefinition);
-		arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationRegisterDefinition);
-		arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationDeleteDefinition);
-		arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationPushDefinition);
-		arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetDefinition);
-	}
-	
-	//=================================================================================================
-	// assistant methods
+    @Autowired
+    private ProviderSecurityConfig providerSecurityConfig;
 
-	//-------------------------------------------------------------------------------------------------
-	private void setTokenSecurityFilter() {
-		final PublicKey authorizationPublicKey = arrowheadService.queryAuthorizationPublicKey();
-		if (authorizationPublicKey == null) {
-			throw new ArrowheadException("Authorization public key is null");
-		}
-		
-		KeyStore keystore;
-		try {
-			keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
-			keystore.load(sslProperties.getKeyStore().getInputStream(), sslProperties.getKeyStorePassword().toCharArray());
-		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException ex) {
-			throw new ArrowheadException(ex.getMessage());
-		}			
-		final PrivateKey providerPrivateKey = Utilities.getPrivateKey(keystore, sslProperties.getKeyPassword());
-		
-		providerSecurityConfig.getTokenSecurityFilter().setAuthorizationPublicKey(authorizationPublicKey);
-		providerSecurityConfig.getTokenSecurityFilter().setMyPrivateKey(providerPrivateKey);
-	}
-	
-	//-------------------------------------------------------------------------------------------------
-	private ServiceRegistryRequestDTO createServiceRegistryRequest(final String serviceDefinition, final String serviceUri, final HttpMethod httpMethod) {
-		final ServiceRegistryRequestDTO serviceRegistryRequest = new ServiceRegistryRequestDTO();
-		serviceRegistryRequest.setServiceDefinition(serviceDefinition);
-		final SystemRequestDTO systemRequest = new SystemRequestDTO();
-		systemRequest.setSystemName(mySystemName);
-		systemRequest.setAddress(mySystemAddress);
-		systemRequest.setPort(mySystemPort);		
+    @Value(ClientCommonConstants.$TOKEN_SECURITY_FILTER_ENABLED_WD)
+    private boolean tokenSecurityFilterEnabled;
 
-		if (tokenSecurityFilterEnabled) {
-			systemRequest.setAuthenticationInfo(Base64.getEncoder().encodeToString(arrowheadService.getMyPublicKey().getEncoded()));
-			serviceRegistryRequest.setSecure(ServiceSecurityType.TOKEN.name());
-			serviceRegistryRequest.setInterfaces(List.of(Constants.INTERFACE_SECURE));
-		} else if (sslEnabled) {
-			systemRequest.setAuthenticationInfo(Base64.getEncoder().encodeToString(arrowheadService.getMyPublicKey().getEncoded()));
-			serviceRegistryRequest.setSecure(ServiceSecurityType.CERTIFICATE.name());
-			serviceRegistryRequest.setInterfaces(List.of(Constants.INTERFACE_SECURE));
-		} else {
-			serviceRegistryRequest.setSecure(ServiceSecurityType.NOT_SECURE.name());
-			serviceRegistryRequest.setInterfaces(List.of(Constants.INTERFACE_INSECURE));
-		}
-		serviceRegistryRequest.setProviderSystem(systemRequest);
-		serviceRegistryRequest.setServiceUri(serviceUri);
-		serviceRegistryRequest.setMetadata(new HashMap<>());
-		serviceRegistryRequest.getMetadata().put(Constants.HTTP_METHOD, httpMethod.name());
-		return serviceRegistryRequest;
-	}
+    @Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
+    private boolean sslEnabled;
+
+    @Value(ClientCommonConstants.$CLIENT_SYSTEM_NAME)
+    private String mySystemName;
+
+    @Value(ClientCommonConstants.$CLIENT_SERVER_ADDRESS_WD)
+    private String mySystemAddress;
+
+    @Value(ClientCommonConstants.$CLIENT_SERVER_PORT_WD)
+    private int mySystemPort;
+
+    private final Logger logger = LogManager.getLogger(ProviderApplicationInitListener.class);
+
+    // =================================================================================================
+    // methods
+
+    // -------------------------------------------------------------------------------------------------
+    @Override
+    protected void customInit(final ContextRefreshedEvent event) {
+
+        // Checking the availability of necessary core systems
+        checkCoreSystemReachability(CoreSystem.SERVICE_REGISTRY);
+        // Initialize Arrowhead Context
+        arrowheadService.updateCoreServiceURIs(CoreSystem.ORCHESTRATOR);
+        arrowheadService.updateCoreServiceURIs(CoreSystem.DATAMANAGER);
+
+        if (sslEnabled && tokenSecurityFilterEnabled) {
+            checkCoreSystemReachability(CoreSystem.AUTHORIZATION);
+
+            // Initialize Arrowhead Context
+            arrowheadService.updateCoreServiceURIs(CoreSystem.AUTHORIZATION);
+
+            setTokenSecurityFilter();
+        } else {
+            logger.info("TokenSecurityFilter in not active");
+        }
+
+        // Register services into ServiceRegistry
+        // Register each APIs
+        // @Get all rules
+        final ServiceRegistryRequestDTO serviceRegistryRequest_1 = createServiceRegistryRequest(
+                Constants.OrchestrationGetAllRulesDefinition, Constants.OrchestrationGetAllRulesURI, HttpMethod.GET);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_1);
+
+        // @Get all rules 2
+        final ServiceRegistryRequestDTO serviceRegistryRequest_2 = createServiceRegistryRequest(
+                Constants.OrchestrationGetAllRules2Definition, Constants.OrchestrationGetAllRules2URI, HttpMethod.GET);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_2);
+
+        // @Get all queries
+        final ServiceRegistryRequestDTO serviceRegistryRequest_3 = createServiceRegistryRequest(
+                Constants.OrchestrationGetAllQueriesDefinition, Constants.OrchestrationGetAllQueriesURI,
+                HttpMethod.GET);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_3);
+
+        // @Get all knowledge
+        final ServiceRegistryRequestDTO serviceRegistryRequest_4 = createServiceRegistryRequest(
+                Constants.OrchestrationGetAllKnowledgeDefinition, Constants.OrchestrationGetAllKnowledgeURI,
+                HttpMethod.GET);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_4);
+
+        // @Post register
+        final ServiceRegistryRequestDTO serviceRegistryRequest_5 = createServiceRegistryRequest(
+                Constants.OrchestrationRegisterDefinition, Constants.OrchestrationRegisterURI, HttpMethod.POST);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_5);
+
+        // @Delete register
+        final ServiceRegistryRequestDTO serviceRegistryRequest_6 = createServiceRegistryRequest(
+                Constants.OrchestrationDeleteDefinition, Constants.OrchestrationDeleteURI, HttpMethod.DELETE);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_6);
+
+        // @Put Orchestration Response
+        final ServiceRegistryRequestDTO serviceRegistryRequest_7 = createServiceRegistryRequest(
+                Constants.OrchestrationPushDefinition, Constants.OrchestrationPushURI, HttpMethod.PUT);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_7);
+
+        // @Get Orchestration Response
+        final ServiceRegistryRequestDTO serviceRegistryRequest_8 = createServiceRegistryRequest(
+                Constants.OrchestrationGetDefinition, Constants.OrchestrationGetURI, HttpMethod.GET);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_8);
+
+        // @Get All Consumers Response
+        final ServiceRegistryRequestDTO serviceRegistryRequest_9 = createServiceRegistryRequest(
+                Constants.OrchestrationGetAllConsumersDefinition, Constants.OrchestrationGetAllConsumersURI,
+                HttpMethod.GET);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_9);
+
+        // @Get Orchestration Response
+        final ServiceRegistryRequestDTO serviceRegistryRequest_10 = createServiceRegistryRequest(
+                Constants.OrchestrationServiceRegisterDefinition, Constants.OrchestrationServiceRegisterURI,
+                HttpMethod.POST);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_10);
+
+        // DATA MANAGER
+        // arrowheadService.updateCoreServiceURIs(CoreSystem.DATAMANAGER);
+        // DataManagerServicesResponseDTO response = arrowheadService.getHistorianServiceList();
+        // System.out.println(response);
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    @Override
+    public void customDestroy() {
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllRulesDefinition);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllRules2Definition);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllQueriesDefinition);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllKnowledgeDefinition);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationRegisterDefinition);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationDeleteDefinition);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationPushDefinition);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetDefinition);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllConsumersDefinition);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationServiceRegisterDefinition);
+    }
+
+    // =================================================================================================
+    // assistant methods
+
+    // -------------------------------------------------------------------------------------------------
+    private void setTokenSecurityFilter() {
+        final PublicKey authorizationPublicKey = arrowheadService.queryAuthorizationPublicKey();
+        if (authorizationPublicKey == null) {
+            throw new ArrowheadException("Authorization public key is null");
+        }
+
+        KeyStore keystore;
+        try {
+            keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
+            keystore.load(sslProperties.getKeyStore().getInputStream(),
+                    sslProperties.getKeyStorePassword().toCharArray());
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException ex) {
+            throw new ArrowheadException(ex.getMessage());
+        }
+        final PrivateKey providerPrivateKey = Utilities.getPrivateKey(keystore, sslProperties.getKeyPassword());
+
+        providerSecurityConfig.getTokenSecurityFilter().setAuthorizationPublicKey(authorizationPublicKey);
+        providerSecurityConfig.getTokenSecurityFilter().setMyPrivateKey(providerPrivateKey);
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    private ServiceRegistryRequestDTO createServiceRegistryRequest(final String serviceDefinition,
+            final String serviceUri, final HttpMethod httpMethod) {
+        final ServiceRegistryRequestDTO serviceRegistryRequest = new ServiceRegistryRequestDTO();
+        serviceRegistryRequest.setServiceDefinition(serviceDefinition);
+        final SystemRequestDTO systemRequest = new SystemRequestDTO();
+        systemRequest.setSystemName(mySystemName);
+        systemRequest.setAddress(mySystemAddress);
+        systemRequest.setPort(mySystemPort);
+
+        if (tokenSecurityFilterEnabled) {
+            systemRequest.setAuthenticationInfo(
+                    Base64.getEncoder().encodeToString(arrowheadService.getMyPublicKey().getEncoded()));
+            serviceRegistryRequest.setSecure(ServiceSecurityType.TOKEN.name());
+            serviceRegistryRequest.setInterfaces(List.of(Constants.INTERFACE_SECURE));
+        } else if (sslEnabled) {
+            systemRequest.setAuthenticationInfo(
+                    Base64.getEncoder().encodeToString(arrowheadService.getMyPublicKey().getEncoded()));
+            serviceRegistryRequest.setSecure(ServiceSecurityType.CERTIFICATE.name());
+            serviceRegistryRequest.setInterfaces(List.of(Constants.INTERFACE_SECURE));
+        } else {
+            serviceRegistryRequest.setSecure(ServiceSecurityType.NOT_SECURE.name());
+            serviceRegistryRequest.setInterfaces(List.of(Constants.INTERFACE_INSECURE));
+        }
+        serviceRegistryRequest.setProviderSystem(systemRequest);
+        serviceRegistryRequest.setServiceUri(serviceUri);
+        serviceRegistryRequest.setMetadata(new HashMap<>());
+        serviceRegistryRequest.getMetadata().put(Constants.HTTP_METHOD, httpMethod.name());
+        return serviceRegistryRequest;
+    }
 }

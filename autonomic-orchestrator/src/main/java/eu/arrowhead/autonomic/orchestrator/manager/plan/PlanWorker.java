@@ -1,58 +1,62 @@
 package eu.arrowhead.autonomic.orchestrator.manager.plan;
 
-public class PlanWorker implements Runnable{
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-	private Thread t;
-	private boolean isRunning = false;
-	protected Plan plan;
-	private String name = "PlanWorker";
-	private long interval;
+@Component
+@Scope("application")
+public class PlanWorker implements Runnable {
 
-	
-	public PlanWorker(Plan plan, long period)
-	{
-		this.plan = plan;
-		this.interval = period;
-	}
-	
-	public void start() {
-		if (t == null) {
-			t = new Thread(this, name);
-			t.start();
-		}
-	}
+    private Thread t;
+    private boolean isRunning = false;
+    protected Plan plan;
+    private String name = "PlanWorker";
+    private long interval;
 
-	public void run() {
+    public PlanWorker(Plan plan, long period) {
+        this.plan = plan;
+        this.interval = period;
+    }
 
-		System.out.println("Thread " + name + " running.");
-		isRunning = true;
-		while (isRunning) {
-			try {
+    public void start() {
+        if (t == null) {
+            t = new Thread(this, name);
+            t.start();
+        }
+    }
 
-				// consumeService();
-				// Let the thread sleep for a while.
-				plan.WorkerProcess();
-				Thread.sleep(interval);
+    @Override
+    public void run() {
 
-			} catch (Exception e) {
-				System.out.println("Thread " + name + " interrupted. Reason: " + e.getMessage());
-				e.printStackTrace();
-			}
-		}
-		System.out.println("Thread " + name + " exiting.");
-	}
+        System.out.println("Thread " + name + " running.");
+        isRunning = true;
+        while (isRunning) {
+            try {
 
-	public void stop() {
-		isRunning = false;
-		t = null;
-	}
+                // consumeService();
+                // Let the thread sleep for a while.
+                plan.WorkerProcess();
+                Thread.sleep(interval);
 
-	public void join() {
-		try {
-			t.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+            } catch (Exception e) {
+                System.out.println("Thread " + name + " interrupted. Reason: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        System.out.println("Thread " + name + " exiting.");
+    }
+
+    public void stop() {
+        isRunning = false;
+        t = null;
+    }
+
+    public void join() {
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 }

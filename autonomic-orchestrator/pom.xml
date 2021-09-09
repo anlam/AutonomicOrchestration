@@ -27,7 +27,7 @@
   		<dependency>
 			<groupId>eu.arrowhead</groupId>
 			<artifactId>client-library</artifactId>
-			<version>4.1.3.13</version>
+			<version>4.3.0.0</version>
 		</dependency>
   
   	<dependency>
@@ -110,6 +110,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
+						    <mainClass>eu.arrowhead.autonomic.orchestrator.OrchestrationRegisterProvider</mainClass>
 							<outputDirectory>${basedir}/target</outputDirectory>
 							<resources>
 								<resource>
