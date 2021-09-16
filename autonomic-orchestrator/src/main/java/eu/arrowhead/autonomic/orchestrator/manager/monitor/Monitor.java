@@ -37,6 +37,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
+
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
@@ -109,7 +111,7 @@ public class Monitor {
     public boolean AddConsumer(BaseConsumer consumer) {
         try {
             // consumer.setMonitor(this);
-            this.consumers.put(consumer.serviceName, consumer);
+            this.consumers.put(consumer.getServiceName(), consumer);
             saveConsumersToFile();
             // consumer.start();
             return true;
@@ -121,10 +123,11 @@ public class Monitor {
     @SuppressWarnings("unchecked")
     public String GetAllConsumers() {
         JSONArray consumersArr = new JSONArray();
+        Gson gson = new Gson();
         for (Map.Entry<String, BaseConsumer> entry : consumers.entrySet()) {
             JSONObject consumerObj = new JSONObject();
             consumerObj.put("consumer", entry.getKey());
-            consumerObj.put("description", entry.getValue());
+            consumerObj.put("description", gson.toJson(entry.getValue()));
             consumersArr.add(consumerObj);
         }
         return consumersArr.toString();
@@ -166,8 +169,8 @@ public class Monitor {
             }
             if (dataManagerUri != null) {
                 for (Entry<String, BaseConsumer> entry : consumers.entrySet()) {
-                    String path = String.format("%s/%s/%s", dataManagerUri.getPath(), entry.getValue().systemName,
-                            entry.getValue().serviceName);
+                    String path = String.format("%s/%s/%s", dataManagerUri.getPath(), entry.getValue().getSystemName(),
+                            entry.getValue().getServiceName());
                     SenML[] response = arrowheadService.consumeServiceHTTP(SenML[].class, HttpMethod.GET,
                             dataManagerUri.getAddress(), dataManagerUri.getPort(), path, getInterface(), null, null,
                             new String[0]);
@@ -212,11 +215,11 @@ public class Monitor {
         try {
             FileWriter csvWriter = new FileWriter(consumerCSV);
             for (Entry<String, BaseConsumer> entry : consumers.entrySet()) {
-                csvWriter.append(entry.getValue().systemName);
+                csvWriter.append(entry.getValue().getSystemName());
                 csvWriter.append(",");
-                csvWriter.append(entry.getValue().serviceName);
+                csvWriter.append(entry.getValue().getServiceName());
                 csvWriter.append(",");
-                csvWriter.append(entry.getValue().serviceEndpoint);
+                csvWriter.append(entry.getValue().getServiceEndpoint());
                 csvWriter.append("\n");
             }
             csvWriter.flush();

@@ -19,10 +19,6 @@ import java.util.TreeMap;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
-import org.apache.jena.util.PrintUtil;
-import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
-import org.apache.jena.vocabulary.XSD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,6 +36,7 @@ import eu.arrowhead.autonomic.orchestrator.manager.analysis.Analysis;
 import eu.arrowhead.autonomic.orchestrator.manager.analysis.AnalysisQueryRequest;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
+import eu.arrowhead.autonomic.orchestrator.manager.knowledge.PrefixModel;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.Monitor;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.model.BaseConsumer;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.model.BaseConsumerFactory;
@@ -89,40 +86,57 @@ public class OrchestrationRegisterResource {
         return ret;
     }
 
+    // @GetMapping(path = Constants.OrchestrationGetAllRules2URI, produces = MediaType.APPLICATION_JSON_VALUE)
+    // @ResponseBody
+    // public List<OrchestrationRuleRegister> getAllRule2() {
+    // System.out.println(plan);
+    // if (plan == null) {
+    // return null;
+    // }
+    //
+    // List<OrchestrationRuleRegister> ret = new ArrayList<OrchestrationRuleRegister>();
+    // List<String> systems = plan.getRegisterSystems();
+    //
+    // // System.out.println(newRule.);
+    //
+    // PrintUtil.registerPrefix("sosa", OntologyNames.SOSA_URL);
+    // PrintUtil.registerPrefix("auto", OntologyNames.BASE_URL);
+    // PrintUtil.registerPrefix("rdfs", RDFS.uri);
+    // PrintUtil.registerPrefix("xsd", XSD.NS);
+    // PrintUtil.registerPrefix("rdf", RDF.getURI());
+    //
+    // // System.out.println(PrintUtil.print(newRule));
+    //
+    // for (String system : systems) {
+    // List<Rule> rules = plan.getRules(system);
+    // List<String> rulesStr = new ArrayList<String>();
+    // for (Rule r : rules) {
+    // rulesStr.add(PrintUtil.print(r));
+    // }
+    // OrchestrationRuleRegister orchRe = new OrchestrationRuleRegister();
+    // orchRe.setSystemName(system);
+    // orchRe.setRules(rulesStr);
+    // ret.add(orchRe);
+    // }
+    //
+    // return ret;
+    // }
+
     @GetMapping(path = Constants.OrchestrationGetAllRules2URI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<OrchestrationRuleRegister> getAllRule2() {
-        System.out.println(plan);
-        if (plan == null) {
-            return null;
-        }
+    public List<PrefixModel> getAllRule2() {
+        List<PrefixModel> prefixes = new ArrayList<PrefixModel>();
+        prefixes.add(new PrefixModel("base", OntologyNames.BASE_URL));
+        prefixes.add(new PrefixModel("san", OntologyNames.SAN_URL));
+        prefixes.add(new PrefixModel("dul", OntologyNames.DUL_URL));
+        prefixes.add(new PrefixModel("dogont", OntologyNames.DOGONT_URL));
+        prefixes.add(new PrefixModel("msm", OntologyNames.MSM_URL));
+        prefixes.add(new PrefixModel("ioto", OntologyNames.IOTO_URL));
+        prefixes.add(new PrefixModel("ssn", OntologyNames.SSN_URL));
+        prefixes.add(new PrefixModel("muo", OntologyNames.MUO_URL));
+        prefixes.add(new PrefixModel("sosa", OntologyNames.SOSA_URL));
 
-        List<OrchestrationRuleRegister> ret = new ArrayList<OrchestrationRuleRegister>();
-        List<String> systems = plan.getRegisterSystems();
-
-        // System.out.println(newRule.);
-
-        PrintUtil.registerPrefix("sosa", OntologyNames.SOSA_URL);
-        PrintUtil.registerPrefix("auto", OntologyNames.BASE_URL);
-        PrintUtil.registerPrefix("rdfs", RDFS.uri);
-        PrintUtil.registerPrefix("xsd", XSD.NS);
-        PrintUtil.registerPrefix("rdf", RDF.getURI());
-
-        // System.out.println(PrintUtil.print(newRule));
-
-        for (String system : systems) {
-            List<Rule> rules = plan.getRules(system);
-            List<String> rulesStr = new ArrayList<String>();
-            for (Rule r : rules) {
-                rulesStr.add(PrintUtil.print(r));
-            }
-            OrchestrationRuleRegister orchRe = new OrchestrationRuleRegister();
-            orchRe.setSystemName(system);
-            orchRe.setRules(rulesStr);
-            ret.add(orchRe);
-        }
-
-        return ret;
+        return prefixes;
     }
 
     @GetMapping(path = Constants.OrchestrationGetAllQueriesURI, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -256,8 +270,8 @@ public class OrchestrationRegisterResource {
         if (monitor == null) {
             return null;
         }
-        BaseConsumer dummy = BaseConsumerFactory.createBaseConsumer(service.systemName, service.serviceName,
-                service.serviceEndpoint);
+        BaseConsumer dummy = BaseConsumerFactory.createBaseConsumer(service.getSystemName(), service.getServiceName(),
+                service.getServiceEndpoint());
         boolean updated = monitor.AddConsumer(dummy);
         if (!updated) {
             return null;
@@ -270,7 +284,7 @@ public class OrchestrationRegisterResource {
     @GetMapping(path = Constants.OrchestrationGetAllConsumersURI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public String getAllConsumers() {
-        System.out.print("receive request get all consumers");
+        System.out.println("receive request get all consumers");
         if (monitor == null) {
             return null;
         }
