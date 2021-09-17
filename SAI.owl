@@ -1,0 +1,135 @@
+@prefix : <https://arrowhead.eu/arrowheadtools/sai#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <https://arrowhead.eu/arrowheadtools/sai> .
+
+<https://arrowhead.eu/arrowheadtools/sai> rdf:type owl:Ontology ;
+                                           owl:versionIRI <https://arrowhead.eu/arrowheadtools/sai/1.0.0> ;
+                                           owl:imports <http://www.w3.org/ns/sosa/> .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  https://arrowhead.eu/arrowheadtools/sai#consumesService
+:consumesService rdf:type owl:ObjectProperty ;
+                 rdfs:subPropertyOf owl:topObjectProperty ;
+                 rdfs:domain :ArrowheadConsumer ;
+                 rdfs:range :ArrowheadService .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#hasLocation
+:hasLocation rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf owl:topObjectProperty ;
+             rdfs:domain :ArrowheadService ;
+             rdfs:range :Location .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#hasService
+:hasService rdf:type owl:ObjectProperty ;
+            rdfs:subPropertyOf owl:topObjectProperty ;
+            rdfs:domain <http://www.w3.org/ns/sosa/Actuator> ,
+                        <http://www.w3.org/ns/sosa/Sensor> ;
+            rdfs:range :ArrowheadService .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#producesService
+:producesService rdf:type owl:ObjectProperty ;
+                 rdfs:subPropertyOf owl:topObjectProperty ;
+                 rdfs:domain :ArrowheadProducer ;
+                 rdfs:range :ArrowheadService .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  https://arrowhead.eu/arrowheadtools/sai#hasAddress
+:hasAddress rdf:type owl:DatatypeProperty ;
+            rdfs:subPropertyOf owl:topDataProperty ;
+            rdfs:domain :ArrowheadService ;
+            rdfs:range xsd:string .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#hasInterface
+:hasInterface rdf:type owl:DatatypeProperty ;
+              rdfs:subPropertyOf owl:topDataProperty ;
+              rdfs:domain :ArrowheadService ;
+              rdfs:range xsd:string .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#hasPort
+:hasPort rdf:type owl:DatatypeProperty ;
+         rdfs:subPropertyOf owl:topDataProperty ;
+         rdfs:domain :ArrowheadService ;
+         rdfs:range xsd:int .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#hasServiceDefinition
+:hasServiceDefinition rdf:type owl:DatatypeProperty ;
+                      rdfs:subPropertyOf owl:topDataProperty ;
+                      rdfs:domain :ArrowheadService ;
+                      rdfs:range xsd:string .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#hasServiceURL
+:hasServiceURL rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf owl:topDataProperty ;
+               rdfs:domain :ArrowheadService ;
+               rdfs:range xsd:string .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#hasSystemName
+:hasSystemName rdf:type owl:DatatypeProperty ;
+               rdfs:subPropertyOf owl:topDataProperty ;
+               rdfs:domain :ArrowheadApplicationSystem ;
+               rdfs:range xsd:string .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  https://arrowhead.eu/arrowheadtools/sai#ArrowheadApplicationSystem
+:ArrowheadApplicationSystem rdf:type owl:Class ;
+                            rdfs:label "Arrowhead Application System"@en .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#ArrowheadConsumer
+:ArrowheadConsumer rdf:type owl:Class ;
+                   rdfs:subClassOf :ArrowheadApplicationSystem ;
+                   rdfs:label "Arrowhead Consumer"@en .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#ArrowheadProducer
+:ArrowheadProducer rdf:type owl:Class ;
+                   rdfs:subClassOf :ArrowheadApplicationSystem ;
+                   rdfs:label "Arrowhead Producer"@en .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#ArrowheadService
+:ArrowheadService rdf:type owl:Class ;
+                  rdfs:label "Arrowhead Service"@en .
+
+
+###  https://arrowhead.eu/arrowheadtools/sai#Location
+:Location rdf:type owl:Class ;
+          rdfs:label "Location"@en .
+
+
+#################################################################
+#    General axioms
+#################################################################
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( :ArrowheadApplicationSystem
+                :ArrowheadConsumer
+                :ArrowheadProducer
+              )
+] .
+
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
