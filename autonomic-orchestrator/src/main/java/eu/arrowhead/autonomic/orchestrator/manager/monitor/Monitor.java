@@ -2,28 +2,28 @@ package eu.arrowhead.autonomic.orchestrator.manager.monitor;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.ReadWrite;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.tdb.TDBFactory;
-import org.apache.jena.update.UpdateAction;
+import javax.net.ssl.SSLContext;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
@@ -33,22 +33,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
+import eu.arrowhead.autonomic.orchestrator.TestConstants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.model.BaseConsumer;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.model.BaseConsumerFactory;
+import eu.arrowhead.autonomic.orchestrator.store.OrchestrationStoreEntryDTO;
+import eu.arrowhead.autonomic.orchestrator.store.OrchestrationStoreResponseDTO;
 //import no.prediktor.apis.demo.consumer.DemoConsumer;
 import eu.arrowhead.client.library.ArrowheadService;
 import eu.arrowhead.client.library.util.CoreServiceUri;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.core.CoreSystemService;
+import eu.arrowhead.common.dto.shared.DataManagerServicesResponseDTO;
+import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
 import eu.arrowhead.common.dto.shared.SenML;
 
 @Service
@@ -61,7 +69,17 @@ public class Monitor {
     @Autowired
     protected SSLProperties sslProperties;
 
+    @Value(TestConstants.$MGMT_KEYSTORE_PATH)
+    private Resource mgmtKeyStore;
+
+    @Value(TestConstants.$MGMT_KEYSTORE_PASSWORD)
+    private String keyStorePassword;
+
+    private CloseableHttpClient httpClient = null;
+    private HttpGet httpGet = null;
+
     private CoreServiceUri dataManagerUri = null;
+    private CoreServiceUri orchestrationUri = null;
 
     // private ReentrantLock lock;
     private TreeMap<String, BaseConsumer> consumers;
@@ -97,8 +115,8 @@ public class Monitor {
                 // Service name, service endpoint
                 while ((row = csvReader.readLine()) != null) {
                     String[] data = row.split(",");
-                    BaseConsumer dummy = BaseConsumerFactory.createBaseConsumer(data[0], data[1], data[2]);
-                    this.consumers.put(data[0], dummy);
+                    // BaseConsumer dummy = BaseConsumerFactory.createBaseConsumer(data[0]);
+                    // this.consumers.put(data[1], dummy);
                 }
                 csvReader.close();
             }
@@ -111,8 +129,8 @@ public class Monitor {
     public boolean AddConsumer(BaseConsumer consumer) {
         try {
             // consumer.setMonitor(this);
-            this.consumers.put(consumer.getServiceName(), consumer);
-            saveConsumersToFile();
+            this.consumers.put(consumer.getSystemName(), consumer);
+            // saveConsumersToFile();
             // consumer.start();
             return true;
         } catch (Exception e) {
@@ -135,72 +153,161 @@ public class Monitor {
 
     @Scheduled(fixedDelay = Constants.MonitorWorkerInterval)
     public void WorkerProcess() {
-        AddObservationFromDataManager();
+        AddConsumerFromOrchestrationStore();
+        InitCurrentTime();
+        UpdateCurrentTime();
+        RequestDataManager();
+    }
+
+    private void RequestDataManager() {
+        try {
+            if (arrowheadService == null) {
+                return;
+            }
+            if (dataManagerUri == null) {
+                dataManagerUri = arrowheadService.getCoreServiceUri(CoreSystemService.PROXY_SERVICE);
+            }
+            if (dataManagerUri != null) {
+                // GET LIST OF SERVICES FIRST
+                GetSystemsFromDataManager();
+                AddObservationFromDataManager();
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+    }
+
+    private void GetSystemsFromDataManager() {
+        DataManagerSystemsResponseDTO systemsResponse = arrowheadService.consumeServiceHTTP(
+                DataManagerSystemsResponseDTO.class, HttpMethod.GET, dataManagerUri.getAddress(),
+                dataManagerUri.getPort(), dataManagerUri.getPath(), getInterface(), null, null, new String[0]);
+        for (String system : systemsResponse.getSystems()) {
+            String path = String.format("%s/%s", dataManagerUri.getPath(), system);
+            DataManagerServicesResponseDTO serviceResponse = arrowheadService.consumeServiceHTTP(
+                    DataManagerServicesResponseDTO.class, HttpMethod.GET, dataManagerUri.getAddress(),
+                    dataManagerUri.getPort(), path, getInterface(), null, null, new String[0]);
+            if (this.consumers.containsKey(system)
+                    && (this.consumers.get(system).getServices().equals(serviceResponse.getServices()))) {
+                continue;
+            }
+            // Create new entries
+            BaseConsumer dummy = BaseConsumerFactory.createBaseConsumer(system, serviceResponse.getServices());
+            this.consumers.put(system, dummy);
+
+            // for (String service : serviceResponse.getServices()) {
+            // KnowledgeBase.getInstance().AddService(service, system, service);
+            // }
+        }
+    }
+
+    private void UpdateCurrentTime() {
         String updateCurentTimeQuery = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
                 + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
                 + "prefix xsd: <" + XSD.getURI() + ">\n" + "delete { :DateTimeNow :hasValue ?Value} \n"
                 + "insert { :DateTimeNow :hasValue \"" + System.currentTimeMillis() + "\"^^xsd:long } \n"
                 + "where {  :DateTimeNow :hasValue ?Value . \n" + "}";
 
-        // System.out.println(updateCurentTimeQuery);
+        List<String> queries = new ArrayList<String>();
+        queries.add(updateCurentTimeQuery);
+
+        KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);
+
+    }
+
+    private void InitCurrentTime() {
+        String updateCurentTimeQuery = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
+                + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
+                + "prefix xsd: <" + XSD.getURI() + ">\n" + "insert { :DateTimeNow :hasValue \""
+                + System.currentTimeMillis() + "\"^^xsd:long } \n"
+                + "where {  minus { :DateTimeNow :hasValue ?Value . \n" + "} }";
 
         List<String> queries = new ArrayList<String>();
         queries.add(updateCurentTimeQuery);
-        // queries.add(offlineString);
-        // queries.add(onlineString);
+
         KnowledgeBase.getInstance().ExecuteUpdateQueries(queries);
-
-        // KnowledgeBase.getInstance().WriteModelToFile("./dataset.ttl");
-
-        // final CoreServiceUri uri = arrowheadService.getCoreServiceUri(CoreSystemService.HISTORIAN_SERVICE);
-        //
-        // DataManagerServicesResponseDTO response = arrowheadService.consumeServiceHTTP(
-        // DataManagerServicesResponseDTO.class, HttpMethod.GET, uri.getAddress(), uri.getPort(), uri.getPath(),
-        // getInterface(), null, null, new String[0]);
-        //
-        // System.out.println(response.toString());
 
     }
 
     private void AddObservationFromDataManager() {
-        try {
-            if (dataManagerUri == null) {
-                dataManagerUri = arrowheadService.getCoreServiceUri(CoreSystemService.HISTORIAN_SERVICE);
-            }
-            if (dataManagerUri != null) {
-                for (Entry<String, BaseConsumer> entry : consumers.entrySet()) {
-                    String path = String.format("%s/%s/%s", dataManagerUri.getPath(), entry.getValue().getSystemName(),
-                            entry.getValue().getServiceName());
-                    SenML[] response = arrowheadService.consumeServiceHTTP(SenML[].class, HttpMethod.GET,
-                            dataManagerUri.getAddress(), dataManagerUri.getPort(), path, getInterface(), null, null,
-                            new String[0]);
-                    if (response[1].getVs() != null) {
-                        long time = 0;
-                        if (response[1].getT() != null) {
-                            time = response[1].getT().longValue();
-                        }
-                        AddObservation("Observation_" + response[0].getBn(), "Service_" + response[0].getBn(), time,
-                                response[1].getVs(), response[1].getN(), response[1].getU(), "double");
+        for (Entry<String, BaseConsumer> entry : consumers.entrySet()) {
+            for (String service : entry.getValue().getServices()) {
+                String path = String.format("%s/%s/%s", dataManagerUri.getPath(), entry.getValue().getSystemName(),
+                        service);
+                final String[] queryParamDataManager = new String[0];
+                SenML[] response = arrowheadService.consumeServiceHTTP(SenML[].class, HttpMethod.GET,
+                        dataManagerUri.getAddress(), dataManagerUri.getPort(), path, getInterface(), null, null,
+                        queryParamDataManager);
+                if (response[0].getVs() != null) {
+                    long time = 0;
+                    if (response[0].getT() != null) {
+                        time = response[0].getT().longValue();
                     }
-
+                    KnowledgeBase.getInstance().AddSensor(response[0].getBn(), "Service_" + service, "unknown",
+                            entry.getValue().getSystemName(), service);
+                    AddObservation("Observation_" + response[0].getBn(), response[0].getBn(), time,
+                            Double.toString(response[0].getV()), response[0].getN(), response[0].getU(), "double");
                 }
             }
-        } catch (Exception e) {
-            System.out.println(e.toString());
         }
-
     }
 
-    // public void start() {
-    // monitorWorker.start();
-    // }
-    //
-    // public void stop() {
-    // for (BaseConsumerWorker consumer : consumers.values()) {
-    // consumer.stop();
-    // }
-    // monitorWorker.stop();
-    // }
+    private void InitStoreClient() {
+        if (orchestrationUri == null) {
+            CoreServiceUri orcUri = arrowheadService.getCoreServiceUri(CoreSystemService.ORCHESTRATION_SERVICE);
+            orchestrationUri = new CoreServiceUri(orcUri.getAddress(), orcUri.getPort(), "/orchestrator/mgmt/store");
+            try {
+                SSLContext sslContext = SSLContexts.custom()
+                        .loadKeyMaterial(mgmtKeyStore.getFile(), keyStorePassword.toCharArray(),
+                                keyStorePassword.toCharArray())
+                        .loadTrustMaterial(sslProperties.getTrustStore().getFile(),
+                                sslProperties.getTrustStorePassword().toCharArray())
+                        .build();
+
+                SSLConnectionSocketFactory sslConSocFactory = new SSLConnectionSocketFactory(sslContext,
+                        new NoopHostnameVerifier());
+
+                httpClient = HttpClients.custom().setSSLSocketFactory(sslConSocFactory).setSSLContext(sslContext)
+                        .build();
+
+                URIBuilder builder = new URIBuilder();
+                builder.setScheme("https");
+                builder.setHost(orchestrationUri.getAddress());
+                builder.setPath(orchestrationUri.getPath());
+                builder.setPort(orchestrationUri.getPort());
+                String url = builder.build().toString();
+
+                httpGet = new HttpGet(url);
+                Header header = new BasicHeader("Content-Type", "application/json");
+
+                httpGet.setHeader(header);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+
+        }
+    }
+
+    private void AddConsumerFromOrchestrationStore() {
+        InitStoreClient();
+        if (httpClient != null) {
+            try {
+                HttpResponse response = httpClient.execute(httpGet);
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    OrchestrationStoreResponseDTO storeEntryList = objectMapper
+                            .readValue(response.getEntity().getContent(), OrchestrationStoreResponseDTO.class);
+                    for (OrchestrationStoreEntryDTO entry : storeEntryList.getData()) {
+                        KnowledgeBase.getInstance().AddConsumer(entry.getConsumerSystem().getSystemName(),
+                                entry.getServiceDefinition().getServiceDefinition(),
+                                entry.getProviderSystem().getSystemName());
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+
+        }
+    }
 
     public void AddObservation(String observationId, String sensorId, long timestamp, String value,
             String featureOfInterest, String unit, String datatype) {
@@ -215,12 +322,13 @@ public class Monitor {
         try {
             FileWriter csvWriter = new FileWriter(consumerCSV);
             for (Entry<String, BaseConsumer> entry : consumers.entrySet()) {
-                csvWriter.append(entry.getValue().getSystemName());
-                csvWriter.append(",");
-                csvWriter.append(entry.getValue().getServiceName());
-                csvWriter.append(",");
-                csvWriter.append(entry.getValue().getServiceEndpoint());
-                csvWriter.append("\n");
+                Iterator<String> servicesIterator = entry.getValue().getServices().iterator();
+                while (servicesIterator.hasNext()) {
+                    csvWriter.append(entry.getValue().getSystemName());
+                    csvWriter.append(",");
+                    csvWriter.append(servicesIterator.next());
+                    csvWriter.append("\n");
+                }
             }
             csvWriter.flush();
             csvWriter.close();
@@ -228,269 +336,4 @@ public class Monitor {
 
         }
     }
-
-    public static void main4(String[] args) throws FileNotFoundException {
-
-        Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
-        dataset.begin(ReadWrite.WRITE);
-
-        try {
-
-            Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
-
-            String updateCurentTimeQuery = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <"
-                    + RDFS.getURI() + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <"
-                    + OntologyNames.SOSA_URL + ">\n" + "prefix xsd: <" + XSD.getURI() + ">\n" +
-                    // "delete { :DateTimeNow :hasValue ?Value} \n" +
-                    "insert data { :DateTimeNow :hasValue \"" + new Date().getTime() + "\"^^xsd:long } \n"
-            // "select distinct ?sensor ?service ?observation ?time \n" +
-            // "where { :DateTimeNow :hasValue ?Value . \n" +
-            // "}"
-            ;
-
-            System.out.println(updateCurentTimeQuery);
-
-            UpdateAction.parseExecute(updateCurentTimeQuery, model);
-
-            model.setNsPrefix("sosa", OntologyNames.SOSA_URL);
-            model.setNsPrefix(":", OntologyNames.BASE_URL);
-            model.setNsPrefix("rdfs", RDFS.uri);
-            model.setNsPrefix("xsd", XSD.NS);
-            model.write(new FileOutputStream(new File("./dataset.ttl")), "TTL");
-
-            dataset.commit();
-
-        } finally {
-            dataset.end();
-
-        }
-
-    }
-
-    public static void main5(String[] args) throws FileNotFoundException {
-
-        Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
-        dataset.begin(ReadWrite.WRITE);
-
-        try {
-
-            Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
-
-            String deviceID1 = "3244631";
-            String deviceID2 = "2999285";
-
-            Resource FeatureOfInterest = model.createResource(OntologyNames.SOSA_URL + "FeatureOfInterest", RDFS.Class);
-            Resource Temperature = model.createResource(OntologyNames.BASE_URL + "Temperature", FeatureOfInterest);
-            Property hasFeatureOfInterest = model.createProperty(OntologyNames.SOSA_URL + "hasFeatureOfInterest");
-
-            Property hasLocation = model.createProperty(OntologyNames.SOSA_URL + "hasLocation");
-
-            Resource Location = model.createResource(OntologyNames.BASE_URL + "PartLocation", RDFS.Class);
-            Resource TopMiddle = model.createResource(OntologyNames.BASE_URL + "TopMiddle", Location);
-
-            Resource observation1 = model.createResource(OntologyNames.BASE_URL + "Observation_" + deviceID1)
-                    .addProperty(hasFeatureOfInterest, Temperature);
-            Resource observation2 = model.createResource(OntologyNames.BASE_URL + "Observation_" + deviceID2)
-                    .addProperty(hasFeatureOfInterest, Temperature);
-
-            Resource Device1Rsr = model.createResource(OntologyNames.BASE_URL + "Device_" + deviceID1)
-                    .addProperty(hasLocation, TopMiddle);
-
-            Resource Device2Rsr = model.createResource(OntologyNames.BASE_URL + "Device_" + deviceID2)
-                    .addProperty(hasLocation, TopMiddle);
-
-            model.setNsPrefix("sosa", OntologyNames.SOSA_URL);
-            model.setNsPrefix(":", OntologyNames.BASE_URL);
-            model.setNsPrefix("rdfs", RDFS.uri);
-            model.setNsPrefix("xsd", XSD.NS);
-            model.write(new FileOutputStream(new File("./dataset.ttl")), "TTL");
-
-            dataset.commit();
-
-        } finally {
-            dataset.end();
-
-        }
-    }
-
-    public static void main3(String[] args) throws FileNotFoundException {
-        Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
-        dataset.begin(ReadWrite.WRITE);
-
-        try {
-
-            Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
-
-            String offlineString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
-                    + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    + "prefix xsd: <" + XSD.getURI() + ">\n" + "delete { ?service :hasState :OnlineState} \n"
-                    + "insert { ?service :hasState :OfflineState}  \n" +
-                    // "select distinct ?sensor ?service ?observation ?time \n" +
-                    "where { ?sensor rdf:type :SensorUnit . \n" + "?service rdf:type :Service . \n"
-                    + "?observation rdf:type sosa:Observation . \n" + "?observation sosa:madeBySensor  ?sensor . \n"
-                    + "?sensor :hasService  ?service . \n" + "?observation sosa:resultTime ?time . \n"
-                    + "?service :hasState :OnlineState . \n" + ":DateTimeNow :hasValue ?now . \n"
-                    + "filter(?time < ?now - 6000) . \n" + "}";
-
-            String onlineString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
-                    + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    + "prefix xsd: <" + XSD.getURI() + ">\n" + "delete { ?service :hasState :OfflineState} \n"
-                    + "insert { ?service :hasState :OnlineState}  \n" +
-                    // "select distinct ?sensor ?service ?observation ?time \n" +
-                    "where { ?sensor rdf:type :SensorUnit . \n" + "?service rdf:type :Service . \n"
-                    + "?observation rdf:type sosa:Observation . \n" + "?observation sosa:madeBySensor  ?sensor . \n"
-                    + "?sensor :hasService  ?service . \n" + "?observation sosa:resultTime ?time . \n"
-                    + "?service :hasState :OfflineState . \n" + ":DateTimeNow :hasValue ?now . \n"
-                    + "filter(?time > ?now - 6000) . \n" + "}";
-
-            UpdateAction.parseExecute(offlineString, model);
-            UpdateAction.parseExecute(onlineString, model);
-
-            model.setNsPrefix("sosa", OntologyNames.SOSA_URL);
-            model.setNsPrefix(":", OntologyNames.BASE_URL);
-            model.setNsPrefix("rdfs", RDFS.uri);
-            model.setNsPrefix("xsd", XSD.NS);
-            model.write(new FileOutputStream(new File("./dataset.ttl")), "TTL");
-
-            System.out.println(offlineString);
-
-            dataset.commit();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        } finally {
-            dataset.end();
-        }
-    }
-
-    public static void main1(String[] args) {
-        Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
-        dataset.begin(ReadWrite.READ);
-
-        try {
-            Model model = dataset.getNamedModel(OntologyNames.BASE_URL + "DemoModel");
-
-            StmtIterator iter = model.listStatements();
-
-            // print out the predicate, subject and object of each statement
-            while (iter.hasNext()) {
-                Statement stmt = iter.nextStatement(); // get next statement
-                Resource subject = stmt.getSubject(); // get the subject
-                Property predicate = stmt.getPredicate(); // get the predicate
-                RDFNode object = stmt.getObject(); // get the object
-
-                System.out.print(subject.toString());
-                System.out.print(" " + predicate.toString() + " ");
-                if (object instanceof Resource) {
-                    System.out.print(object.toString());
-                } else {
-                    // object is a literal
-                    System.out.print(" \"" + object.toString() + "\"");
-                }
-
-                System.out.println(" .");
-
-                // dataset.commit();
-            }
-        } finally {
-            dataset.end();
-        }
-    }
-
-    public static void main2(String[] args) throws FileNotFoundException {
-        // TODO Auto-generated method stub
-
-        // String directory = "./src/main/resources/dataset/" ;
-        Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
-
-        dataset.begin(ReadWrite.WRITE);
-        try {
-            // Model model = dataset.getDefaultModel() ;
-
-            Model model = ModelFactory.createDefaultModel();
-
-            String applicationName = "PrediktorApisServer";
-            String deviceID1 = "3244631";
-            String deviceID2 = "2999285";
-
-            Resource applicationRsr = model.createResource(OntologyNames.BASE_URL + "ApplicationSystem", RDFS.Class);
-            Resource providerRsr = model.createResource(OntologyNames.BASE_URL + "Provider", RDFS.Class)
-                    .addProperty(RDFS.subClassOf, applicationRsr);
-            Resource consumer = model.createResource(OntologyNames.BASE_URL + "Consumer", RDFS.Class)
-                    .addProperty(RDFS.subClassOf, applicationRsr);
-
-            Resource deviceRsr = model.createResource(OntologyNames.BASE_URL + "Device", RDFS.Class);
-            Resource sensorUnitRsr = model.createResource(OntologyNames.BASE_URL + "SensorUnit", RDFS.Class)
-                    .addProperty(RDFS.subClassOf, deviceRsr);
-
-            Resource serviceRsr = model.createResource(OntologyNames.BASE_URL + "Service", RDFS.Class);
-
-            Resource observationRsr = model.createResource(OntologyNames.SOSA_URL + "Observation", RDFS.Class);
-
-            // Property
-            Property hasServiceProp = model.createProperty(OntologyNames.BASE_URL + "hasService");
-            Property consumesServiceProp = model.createProperty(OntologyNames.BASE_URL + "consumesService");
-            // Property hasTimestampProp = model.createProperty(OntologyNames.BASE_URL + "hasTimestamp");
-            Property hasIDProp = model.createProperty(OntologyNames.BASE_URL + "hasID");
-
-            Property madeBySensorProp = model.createProperty(OntologyNames.SOSA_URL + "madeBySensor");
-            Property hasSimpleResultProp = model.createProperty(OntologyNames.SOSA_URL + "hasSimpleResult");
-            Property resultTimeProp = model.createProperty(OntologyNames.SOSA_URL + "resultTime");
-
-            // Individuals
-            Resource Service1Rsr = model.createResource(OntologyNames.BASE_URL + "Service_" + deviceID1, serviceRsr)
-                    .addProperty(hasIDProp, deviceID1);
-
-            Resource Device1Rsr = model.createResource(OntologyNames.BASE_URL + "Device_" + deviceID1, sensorUnitRsr)
-                    .addProperty(hasIDProp, deviceID1).addProperty(hasServiceProp, Service1Rsr);
-
-            Resource Service2Rsr = model.createResource(OntologyNames.BASE_URL + "Service_" + deviceID2, serviceRsr)
-                    .addProperty(hasIDProp, deviceID2);
-
-            Resource Device2Rsr = model.createResource(OntologyNames.BASE_URL + "Device_" + deviceID2, sensorUnitRsr)
-                    .addProperty(hasIDProp, deviceID2).addProperty(hasServiceProp, Service2Rsr);
-
-            Resource prediktorAppRsr = model.createResource(OntologyNames.BASE_URL + applicationName, consumer)
-                    .addProperty(hasIDProp, applicationName).addProperty(consumesServiceProp, Service1Rsr);
-
-            Resource observation1 = model
-                    .createResource(OntologyNames.BASE_URL + "Observation_" + deviceID1, observationRsr)
-                    .addProperty(madeBySensorProp, Device1Rsr)
-                    .addProperty(resultTimeProp, model.createTypedLiteral(888888))
-                    .addProperty(hasSimpleResultProp, model.createTypedLiteral(1.234));
-
-            dataset.addNamedModel(OntologyNames.BASE_URL + "DemoModel", model);
-
-            model.write(new FileOutputStream(new File("./dataset.ttl")), "RDF/XML-ABBREV");
-
-            // list the statements in the Model
-            StmtIterator iter = model.listStatements();
-
-            // print out the predicate, subject and object of each statement
-            while (iter.hasNext()) {
-                Statement stmt = iter.nextStatement(); // get next statement
-                Resource subject = stmt.getSubject(); // get the subject
-                Property predicate = stmt.getPredicate(); // get the predicate
-                RDFNode object = stmt.getObject(); // get the object
-
-                System.out.print(subject.toString());
-                System.out.print(" " + predicate.toString() + " ");
-                if (object instanceof Resource) {
-                    System.out.print(object.toString());
-                } else {
-                    // object is a literal
-                    System.out.print(" \"" + object.toString() + "\"");
-                }
-
-                System.out.println(" .");
-            }
-
-            dataset.commit();
-        } finally {
-            dataset.end();
-        }
-
-    }
-
 }

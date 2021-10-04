@@ -3,10 +3,61 @@
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sosa:  <http://www.w3.org/ns/sosa#> .
 
-:Observation_temp_service
+:robot_consumer  a        :Consumer ;
+        :consumesService  :temp_service_definition .
+
+:DateTimeNow  :hasValue  1633385238087 .
+
+:Service_temp_service_definition
+        a                      :Service ;
+        :hasServiceDefinition  "temp_service_definition" ;
+        :hasState              :OnlineState .
+
+:robot_producer  a        :Producer ;
+        :producesService  :Service_temp_service_definition , :Service_humidity_service_definition , :Service_pressure_service_definition .
+
+:temp_sensor  a           :SensorUnit ;
+        :hasService       :Service_temp_service_definition ;
+        sosa:hasLocation  :unknown .
+
+:Observation_temp_sensor
         a                          sosa:Observation ;
-        :hasUnit                   "string" ;
-        sosa:hasFeatureOfInterest  :string ;
-        sosa:hasSimpleResult       "string"^^xsd:double ;
-        sosa:madeBySensor          :Service_temp_service ;
-        sosa:resultTime            0 .
+        :hasUnit                   "celsius" ;
+        sosa:hasFeatureOfInterest  :Temperature ;
+        sosa:hasSimpleResult       "5.599700349580209"^^xsd:double ;
+        sosa:madeBySensor          :temp_sensor ;
+        sosa:resultTime            1633385234291 .
+
+:Service_humidity_service_definition
+        a                      :Service ;
+        :hasServiceDefinition  "humidity_service_definition" ;
+        :hasState              :OnlineState .
+
+:humidity_sensor  a       :SensorUnit ;
+        :hasService       :Service_humidity_service_definition ;
+        sosa:hasLocation  :unknown .
+
+:Observation_humidity_sensor
+        a                          sosa:Observation ;
+        :hasUnit                   "Percentage" ;
+        sosa:hasFeatureOfInterest  :Humidity ;
+        sosa:hasSimpleResult       "0.17887382961813275"^^xsd:double ;
+        sosa:madeBySensor          :humidity_sensor ;
+        sosa:resultTime            1633385234291 .
+
+:Service_pressure_service_definition
+        a                      :Service ;
+        :hasServiceDefinition  "pressure_service_definition" ;
+        :hasState              :OnlineState .
+
+:pressure_sensor  a       :SensorUnit ;
+        :hasService       :Service_pressure_service_definition ;
+        sosa:hasLocation  :unknown .
+
+:Observation_pressure_sensor
+        a                          sosa:Observation ;
+        :hasUnit                   "Pa" ;
+        sosa:hasFeatureOfInterest  :Pressure ;
+        sosa:hasSimpleResult       "31.005241257810034"^^xsd:double ;
+        sosa:madeBySensor          :pressure_sensor ;
+        sosa:resultTime            1633385234291 .

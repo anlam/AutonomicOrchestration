@@ -38,8 +38,6 @@ import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.PrefixModel;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.Monitor;
-import eu.arrowhead.autonomic.orchestrator.manager.monitor.model.BaseConsumer;
-import eu.arrowhead.autonomic.orchestrator.manager.monitor.model.BaseConsumerFactory;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.Plan;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.Adaptation;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.AdaptationPlan;
@@ -264,22 +262,22 @@ public class OrchestrationRegisterResource {
     }
 
     // @POST
-    @PostMapping(path = Constants.OrchestrationServiceRegisterURI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public BaseConsumer registerService(@RequestBody BaseConsumer service) {
-        if (monitor == null) {
-            return null;
-        }
-        BaseConsumer dummy = BaseConsumerFactory.createBaseConsumer(service.getSystemName(), service.getServiceName(),
-                service.getServiceEndpoint());
-        boolean updated = monitor.AddConsumer(dummy);
-        if (!updated) {
-            return null;
-        }
-
-        // Return a response with Accepted status code
-        return service;
-    }
+    // @PostMapping(path = Constants.OrchestrationServiceRegisterURI, produces = MediaType.APPLICATION_JSON_VALUE)
+    // @ResponseBody
+    // public BaseConsumer registerService(@RequestBody BaseConsumer service) {
+    // if (monitor == null) {
+    // return null;
+    // }
+    // BaseConsumer dummy = BaseConsumerFactory.createBaseConsumer(service.getSystemName(), service.getServiceName(),
+    // service.getServiceEndpoint());
+    // boolean updated = monitor.AddConsumer(dummy);
+    // if (!updated) {
+    // return null;
+    // }
+    //
+    // // Return a response with Accepted status code
+    // return service;
+    // }
 
     @GetMapping(path = Constants.OrchestrationGetAllConsumersURI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
