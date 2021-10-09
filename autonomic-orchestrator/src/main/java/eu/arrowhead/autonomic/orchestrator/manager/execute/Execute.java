@@ -2,32 +2,35 @@ package eu.arrowhead.autonomic.orchestrator.manager.execute;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
-import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.Plan;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.Adaptation;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.AdaptationPlan;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.PlanStatus;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.SubstitutionAdaptation;
+import eu.arrowhead.autonomic.orchestrator.mgmt.ArrowheadMgmtService;
 
 @Service
 public class Execute {
 
     // private ExecuteWorker executeWorker;
     private TreeMap<String, String> consumerOrchestrationPushEndpointTreeMap;
+
+    @Autowired
+    private ArrowheadMgmtService arrowheadMgmtService;
 
     private Plan plan;
 
@@ -39,18 +42,6 @@ public class Execute {
         this.plan = plan;
     }
 
-    // public static void main(String[] args) {
-    //
-    // JenaSystem.init();
-    // // TODO Auto-generated method stub
-    // Plan plan = new Plan();
-    // Execute execute = new Execute(plan);
-    //
-    // plan.start();
-    // execute.start();
-    //
-    // }
-
     @Scheduled(fixedDelay = Constants.ExecuteWorkerInterval)
     public void WorkerProcess() {
 
@@ -59,22 +50,46 @@ public class Execute {
 
     }
 
+    // private void checkAndSendAdaptation() {
+    // for (String consumerName : consumerOrchestrationPushEndpointTreeMap.keySet()) {
+    // AdaptationPlan adaptPlan = plan.GetAdaptationPlan(consumerName);
+    // if (adaptPlan != null) {
+    //
+    // if (adaptPlan.getStatus() == PlanStatus.NEW) // || adaptPlan.getStatus() == PlanStatus.SENT)
+    // {
+    // log.debug("Execute found adapation plan for: " + consumerName);
+    // log.debug(adaptPlan.toString());
+    //
+    // System.out.println("Execute found adapation plan for: " + consumerName);
+    // System.out.println(adaptPlan);
+    //
+    // String orchPushEp = consumerOrchestrationPushEndpointTreeMap.get(consumerName);
+    // OrchestrationPushWorker orchestrationPushWorker = new OrchestrationPushWorker(this, plan,
+    // consumerName, adaptPlan, orchPushEp, 0, null);
+    // orchestrationPushWorker.start();
+    // }
+    // }
+    //
+    // }
+    // }
+
     private void checkAndSendAdaptation() {
-        for (String consumerName : consumerOrchestrationPushEndpointTreeMap.keySet()) {
-            AdaptationPlan adaptPlan = plan.GetAdaptationPlan(consumerName);
+        TreeMap<String, AdaptationPlan> copiedPlans = plan.GetAllAdaptationPlans();
+        for (Entry<String, AdaptationPlan> entry : copiedPlans.entrySet()) {
+            AdaptationPlan adaptPlan = entry.getValue();
             if (adaptPlan != null) {
 
                 if (adaptPlan.getStatus() == PlanStatus.NEW) // || adaptPlan.getStatus() == PlanStatus.SENT)
                 {
-                    log.debug("Execute found adapation plan for: " + consumerName);
+                    log.debug("Execute found adapation plan for: " + entry.getKey());
                     log.debug(adaptPlan.toString());
 
-                    System.out.println("Execute found adapation plan for: " + consumerName);
+                    System.out.println("Execute found adapation plan for: " + entry.getKey());
                     System.out.println(adaptPlan);
 
-                    String orchPushEp = consumerOrchestrationPushEndpointTreeMap.get(consumerName);
+                    String orchPushEp = consumerOrchestrationPushEndpointTreeMap.get(entry.getKey());
                     OrchestrationPushWorker orchestrationPushWorker = new OrchestrationPushWorker(this, plan,
-                            consumerName, adaptPlan, orchPushEp, 0, null);
+                            entry.getKey(), adaptPlan, orchPushEp, 0, null);
                     orchestrationPushWorker.start();
                 }
             }
@@ -82,9 +97,13 @@ public class Execute {
         }
     }
 
+    private void getSubstituteProviderInfo() {
+
+    }
+
+    // @formatter:off
     private void getOrchestrationPushEndpoints() {
-        String queryString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI() + ">\n"
-                + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
+        String queryString = Constants.PREFIX_STRING
                 + "select ?c ?s ?a \n" + "where { " +
                 // "?c rdf:type :Consumer . \n" +
                 "?c :producesService ?s . \n" + "?s :hasServiceDefinition \"" + Constants.OrchestrationPushDefinition
@@ -106,14 +125,6 @@ public class Execute {
 
         }
     }
-
-    // public void start() {
-    // executeWorker.start();
-    // }
-    //
-    // public void stop() {
-    // executeWorker.stop();
-    // }
 
     public void ProcessExecutedAdaptationPlan(String consumerName, AdaptationPlan adaptationPlan) {
 
@@ -165,15 +176,14 @@ public class Execute {
 
     }
 
+    // @formatter:off
     private void updateKnowledgeBaseWithExecutedSubstitution(String consumerName,
             SubstitutionAdaptation substitutionAdaptation) {
-        String deleteString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI() + ">\n"
-                + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
+        String deleteString = Constants.PREFIX_STRING
                 + "delete data { :" + consumerName + " :consumesService :" + substitutionAdaptation.getFromService()
                 + "}";
 
-        String insertString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI() + ">\n"
-                + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
+        String insertString = Constants.PREFIX_STRING
                 + "insert data { :" + consumerName + " :consumesService :" + substitutionAdaptation.getToService()
                 + "}";
 

@@ -20,6 +20,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
+import eu.arrowhead.autonomic.orchestrator.mgmt.ArrowheadMgmtService;
 import eu.arrowhead.client.library.ArrowheadService;
 import eu.arrowhead.client.library.config.ApplicationInitListener;
 import eu.arrowhead.client.library.util.ClientCommonConstants;
@@ -40,6 +41,9 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
 
     @Autowired
     private ArrowheadService arrowheadService;
+
+    @Autowired
+    private ArrowheadMgmtService arrowheadMgmtService;
 
     @Autowired
     private ProviderSecurityConfig providerSecurityConfig;
@@ -141,10 +145,8 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
                 HttpMethod.POST);
         arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_10);
 
-        // DATA MANAGER
-        // arrowheadService.updateCoreServiceURIs(CoreSystem.DATAMANAGER);
-        // DataManagerServicesResponseDTO response = arrowheadService.getHistorianServiceList();
-        // System.out.println(response);
+        // MGMT
+        arrowheadMgmtService.InitMgmt();
     }
 
     // -------------------------------------------------------------------------------------------------

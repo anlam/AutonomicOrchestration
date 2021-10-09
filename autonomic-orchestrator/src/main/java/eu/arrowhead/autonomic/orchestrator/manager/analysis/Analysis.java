@@ -31,15 +31,6 @@ public class Analysis {
         queries = new TreeMap<String, String>();
         queryLastUpdated = new TreeMap<String, Long>();
 
-        // analysisWorker = new AnalysisWorker(this, Constants.AnalysisWorkerInterval);
-
-    }
-
-    public static void main(String[] args) {
-        // TODO Auto-generated method stub
-        Analysis analysis = new Analysis();
-        // analysis.start();
-
     }
 
     @Scheduled(fixedDelay = Constants.AnalysisWorkerInterval)
@@ -106,9 +97,5 @@ public class Analysis {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, StandardCharsets.UTF_8);
     }
-
-    // public void stop() {
-    // analysisWorker.stop();
-    // }
 
 }

@@ -19,6 +19,10 @@ import java.util.TreeMap;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
+import org.apache.jena.util.PrintUtil;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +40,6 @@ import eu.arrowhead.autonomic.orchestrator.manager.analysis.Analysis;
 import eu.arrowhead.autonomic.orchestrator.manager.analysis.AnalysisQueryRequest;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
-import eu.arrowhead.autonomic.orchestrator.manager.knowledge.PrefixModel;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.Monitor;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.Plan;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.Adaptation;
@@ -47,12 +50,8 @@ import eu.arrowhead.autonomic.orchestrator.manager.plan.model.OrchestrationRuleR
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.PlanStatus;
 
 @RestController
-// @RequestMapping(Constants.OrchestrationRegisterURI)
-// @Produces(MediaType.APPLICATION_JSON)
-// REST service example
 public class OrchestrationRegisterResource {
 
-    // static final String SERVICE_URI = Constants.OrchestrationRegisterURI;
     @Autowired
     public Plan plan;
 
@@ -72,69 +71,34 @@ public class OrchestrationRegisterResource {
 
         List<OrchestrationRuleRegister> ret = new ArrayList<OrchestrationRuleRegister>();
         List<String> systems = plan.getRegisterSystems();
+
+        PrintUtil.registerPrefix("sosa", OntologyNames.SOSA_URL);
+        PrintUtil.registerPrefix("auto", OntologyNames.BASE_URL);
+        PrintUtil.registerPrefix("rdfs", RDFS.uri);
+        PrintUtil.registerPrefix("xsd", XSD.NS);
+        PrintUtil.registerPrefix("rdf", RDF.getURI());
+        PrintUtil.registerPrefix("sai", OntologyNames.SAI_URL);
+        PrintUtil.registerPrefix("san", OntologyNames.SAN_URL);
+        PrintUtil.registerPrefix("dul", OntologyNames.DUL_URL);
+        PrintUtil.registerPrefix("dogont", OntologyNames.DOGONT_URL);
+        PrintUtil.registerPrefix("msm", OntologyNames.MSM_URL);
+        PrintUtil.registerPrefix("ioto", OntologyNames.IOTO_URL);
+        PrintUtil.registerPrefix("ssn", OntologyNames.SSN_URL);
+        PrintUtil.registerPrefix("muo", OntologyNames.MUO_URL);
+
         for (String system : systems) {
             List<Rule> rules = plan.getRules(system);
-
+            List<String> rulesStr = new ArrayList<String>();
+            for (Rule r : rules) {
+                rulesStr.add(PrintUtil.print(r));
+            }
             OrchestrationRuleRegister orchRe = new OrchestrationRuleRegister();
             orchRe.setSystemName(system);
-            orchRe.setRawRules(rules);
+            orchRe.setRules(rulesStr);
             ret.add(orchRe);
         }
 
         return ret;
-    }
-
-    // @GetMapping(path = Constants.OrchestrationGetAllRules2URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    // @ResponseBody
-    // public List<OrchestrationRuleRegister> getAllRule2() {
-    // System.out.println(plan);
-    // if (plan == null) {
-    // return null;
-    // }
-    //
-    // List<OrchestrationRuleRegister> ret = new ArrayList<OrchestrationRuleRegister>();
-    // List<String> systems = plan.getRegisterSystems();
-    //
-    // // System.out.println(newRule.);
-    //
-    // PrintUtil.registerPrefix("sosa", OntologyNames.SOSA_URL);
-    // PrintUtil.registerPrefix("auto", OntologyNames.BASE_URL);
-    // PrintUtil.registerPrefix("rdfs", RDFS.uri);
-    // PrintUtil.registerPrefix("xsd", XSD.NS);
-    // PrintUtil.registerPrefix("rdf", RDF.getURI());
-    //
-    // // System.out.println(PrintUtil.print(newRule));
-    //
-    // for (String system : systems) {
-    // List<Rule> rules = plan.getRules(system);
-    // List<String> rulesStr = new ArrayList<String>();
-    // for (Rule r : rules) {
-    // rulesStr.add(PrintUtil.print(r));
-    // }
-    // OrchestrationRuleRegister orchRe = new OrchestrationRuleRegister();
-    // orchRe.setSystemName(system);
-    // orchRe.setRules(rulesStr);
-    // ret.add(orchRe);
-    // }
-    //
-    // return ret;
-    // }
-
-    @GetMapping(path = Constants.OrchestrationGetAllRules2URI, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public List<PrefixModel> getAllRule2() {
-        List<PrefixModel> prefixes = new ArrayList<PrefixModel>();
-        prefixes.add(new PrefixModel("base", OntologyNames.BASE_URL));
-        prefixes.add(new PrefixModel("san", OntologyNames.SAN_URL));
-        prefixes.add(new PrefixModel("dul", OntologyNames.DUL_URL));
-        prefixes.add(new PrefixModel("dogont", OntologyNames.DOGONT_URL));
-        prefixes.add(new PrefixModel("msm", OntologyNames.MSM_URL));
-        prefixes.add(new PrefixModel("ioto", OntologyNames.IOTO_URL));
-        prefixes.add(new PrefixModel("ssn", OntologyNames.SSN_URL));
-        prefixes.add(new PrefixModel("muo", OntologyNames.MUO_URL));
-        prefixes.add(new PrefixModel("sosa", OntologyNames.SOSA_URL));
-
-        return prefixes;
     }
 
     @GetMapping(path = Constants.OrchestrationGetAllQueriesURI, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -146,8 +110,6 @@ public class OrchestrationRegisterResource {
         for (String key : queries.keySet()) {
             String query = queries.get(key);
             UpdateRequest request = UpdateFactory.create(query);
-            // Query q = QueryFactory.create(query);
-            // queries.put(key, request.toString());
             AnalysisQueryRequest q = new AnalysisQueryRequest();
             q.setName(key);
             q.setQuery(request.toString());
@@ -191,7 +153,7 @@ public class OrchestrationRegisterResource {
         for (Rule r : updatedRules) {
             rulesList.add(r.toString());
         }
-        updatedForm.setRules(rulesList);
+        // updatedForm.setRules(rulesList);
 
         // Return a response with Accepted status code
         return updatedForm;
@@ -199,7 +161,7 @@ public class OrchestrationRegisterResource {
 
     // @PUT
     @DeleteMapping(path = Constants.OrchestrationDeleteURI)
-    public void deleteRule(OrchestrationRuleDelete rules) {
+    public void deleteRule(@RequestBody OrchestrationRuleDelete rules) {
         if (plan == null) {
             return;
         }
@@ -281,14 +243,8 @@ public class OrchestrationRegisterResource {
 
     @GetMapping(path = Constants.OrchestrationGetAllConsumersURI, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String getAllConsumers() {
-        System.out.println("receive request get all consumers");
-        if (monitor == null) {
-            return null;
-        }
-
-        String consumers = monitor.GetAllConsumers();
-        return consumers;
+    public TreeMap<String, List<Rule>> getAllConsumers() {
+        return null;
     }
 
 }

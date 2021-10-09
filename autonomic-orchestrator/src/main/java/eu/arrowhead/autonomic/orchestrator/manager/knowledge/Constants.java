@@ -1,5 +1,9 @@
 package eu.arrowhead.autonomic.orchestrator.manager.knowledge;
 
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
+
 public class Constants {
     public static final String datasetDir = "./src/main/resources/dataset/";
 
@@ -57,4 +61,12 @@ public class Constants {
     public static final String INTERFACE_SECURE = "HTTPS-SECURE-JSON";
     public static final String INTERFACE_INSECURE = "HTTP-INSECURE-JSON";
     public static final String HTTP_METHOD = "http-method";
+
+    // @formatter:off
+    public static final String PREFIX_STRING = "prefix : <" + OntologyNames.BASE_URL + ">\n"
+                                        + "prefix sai: <" + OntologyNames.SAI_URL + ">\n"
+                                        + "prefix rdfs: <" + RDFS.getURI() + ">\n"
+                                        + "prefix rdf: <" + RDF.getURI() + ">\n"
+                                        + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
+                                        + "prefix xsd: <" + XSD.getURI() + ">\n";
 }

@@ -1,53 +1,23 @@
 package eu.arrowhead.autonomic.orchestrator.manager.monitor;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import javax.net.ssl.SSLContext;
-
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
-import org.apache.jena.vocabulary.XSD;
-import org.jose4j.json.internal.json_simple.JSONArray;
-import org.jose4j.json.internal.json_simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-
-import eu.arrowhead.autonomic.orchestrator.TestConstants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
-import eu.arrowhead.autonomic.orchestrator.manager.knowledge.OntologyNames;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.model.BaseConsumer;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.model.BaseConsumerFactory;
+import eu.arrowhead.autonomic.orchestrator.mgmt.ArrowheadMgmtService;
 import eu.arrowhead.autonomic.orchestrator.store.OrchestrationStoreEntryDTO;
 import eu.arrowhead.autonomic.orchestrator.store.OrchestrationStoreResponseDTO;
 //import no.prediktor.apis.demo.consumer.DemoConsumer;
@@ -67,23 +37,15 @@ public class Monitor {
     private ArrowheadService arrowheadService;
 
     @Autowired
+    private ArrowheadMgmtService arrowheadMgmtService;
+
+    @Autowired
     protected SSLProperties sslProperties;
 
-    @Value(TestConstants.$MGMT_KEYSTORE_PATH)
-    private Resource mgmtKeyStore;
-
-    @Value(TestConstants.$MGMT_KEYSTORE_PASSWORD)
-    private String keyStorePassword;
-
-    private CloseableHttpClient httpClient = null;
-    private HttpGet httpGet = null;
-
     private CoreServiceUri dataManagerUri = null;
-    private CoreServiceUri orchestrationUri = null;
 
     // private ReentrantLock lock;
     private TreeMap<String, BaseConsumer> consumers;
-    private String consumerCSV = "consumer.csv";
 
     private static final Logger log = LoggerFactory.getLogger(Monitor.class);
 
@@ -95,60 +57,6 @@ public class Monitor {
 
         // lock = new ReentrantLock();
         consumers = new TreeMap<String, BaseConsumer>();
-        init();
-    }
-
-    private void init() {
-        File tmpDir = new File(consumerCSV);
-        boolean exists = tmpDir.exists();
-
-        try {
-            if (!exists) {
-                FileOutputStream fos;
-
-                fos = new FileOutputStream(consumerCSV);
-
-                fos.close();
-            } else {
-                BufferedReader csvReader = new BufferedReader(new FileReader(consumerCSV));
-                String row;
-                // Service name, service endpoint
-                while ((row = csvReader.readLine()) != null) {
-                    String[] data = row.split(",");
-                    // BaseConsumer dummy = BaseConsumerFactory.createBaseConsumer(data[0]);
-                    // this.consumers.put(data[1], dummy);
-                }
-                csvReader.close();
-            }
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    public boolean AddConsumer(BaseConsumer consumer) {
-        try {
-            // consumer.setMonitor(this);
-            this.consumers.put(consumer.getSystemName(), consumer);
-            // saveConsumersToFile();
-            // consumer.start();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public String GetAllConsumers() {
-        JSONArray consumersArr = new JSONArray();
-        Gson gson = new Gson();
-        for (Map.Entry<String, BaseConsumer> entry : consumers.entrySet()) {
-            JSONObject consumerObj = new JSONObject();
-            consumerObj.put("consumer", entry.getKey());
-            consumerObj.put("description", gson.toJson(entry.getValue()));
-            consumersArr.add(consumerObj);
-        }
-        return consumersArr.toString();
     }
 
     @Scheduled(fixedDelay = Constants.MonitorWorkerInterval)
@@ -200,10 +108,10 @@ public class Monitor {
         }
     }
 
+    // @formatter:off
     private void UpdateCurrentTime() {
-        String updateCurentTimeQuery = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
-                + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                + "prefix xsd: <" + XSD.getURI() + ">\n" + "delete { :DateTimeNow :hasValue ?Value} \n"
+        String updateCurentTimeQuery = Constants.PREFIX_STRING
+                + "delete { :DateTimeNow :hasValue ?Value} \n"
                 + "insert { :DateTimeNow :hasValue \"" + System.currentTimeMillis() + "\"^^xsd:long } \n"
                 + "where {  :DateTimeNow :hasValue ?Value . \n" + "}";
 
@@ -214,10 +122,10 @@ public class Monitor {
 
     }
 
+    // @formatter:off
     private void InitCurrentTime() {
-        String updateCurentTimeQuery = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
-                + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                + "prefix xsd: <" + XSD.getURI() + ">\n" + "insert { :DateTimeNow :hasValue \""
+        String updateCurentTimeQuery = Constants.PREFIX_STRING
+                + "insert { :DateTimeNow :hasValue \""
                 + System.currentTimeMillis() + "\"^^xsd:long } \n"
                 + "where {  minus { :DateTimeNow :hasValue ?Value . \n" + "} }";
 
@@ -251,61 +159,15 @@ public class Monitor {
         }
     }
 
-    private void InitStoreClient() {
-        if (orchestrationUri == null) {
-            CoreServiceUri orcUri = arrowheadService.getCoreServiceUri(CoreSystemService.ORCHESTRATION_SERVICE);
-            orchestrationUri = new CoreServiceUri(orcUri.getAddress(), orcUri.getPort(), "/orchestrator/mgmt/store");
-            try {
-                SSLContext sslContext = SSLContexts.custom()
-                        .loadKeyMaterial(mgmtKeyStore.getFile(), keyStorePassword.toCharArray(),
-                                keyStorePassword.toCharArray())
-                        .loadTrustMaterial(sslProperties.getTrustStore().getFile(),
-                                sslProperties.getTrustStorePassword().toCharArray())
-                        .build();
-
-                SSLConnectionSocketFactory sslConSocFactory = new SSLConnectionSocketFactory(sslContext,
-                        new NoopHostnameVerifier());
-
-                httpClient = HttpClients.custom().setSSLSocketFactory(sslConSocFactory).setSSLContext(sslContext)
-                        .build();
-
-                URIBuilder builder = new URIBuilder();
-                builder.setScheme("https");
-                builder.setHost(orchestrationUri.getAddress());
-                builder.setPath(orchestrationUri.getPath());
-                builder.setPort(orchestrationUri.getPort());
-                String url = builder.build().toString();
-
-                httpGet = new HttpGet(url);
-                Header header = new BasicHeader("Content-Type", "application/json");
-
-                httpGet.setHeader(header);
-            } catch (Exception e) {
-                System.out.println(e);
-            }
-
-        }
-    }
-
     private void AddConsumerFromOrchestrationStore() {
-        InitStoreClient();
-        if (httpClient != null) {
-            try {
-                HttpResponse response = httpClient.execute(httpGet);
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    OrchestrationStoreResponseDTO storeEntryList = objectMapper
-                            .readValue(response.getEntity().getContent(), OrchestrationStoreResponseDTO.class);
-                    for (OrchestrationStoreEntryDTO entry : storeEntryList.getData()) {
-                        KnowledgeBase.getInstance().AddConsumer(entry.getConsumerSystem().getSystemName(),
-                                entry.getServiceDefinition().getServiceDefinition(),
-                                entry.getProviderSystem().getSystemName());
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println(e);
+        OrchestrationStoreResponseDTO storeEntryList = arrowheadMgmtService.getAllStoreEntry();
+        if (storeEntryList != null) {
+            for (OrchestrationStoreEntryDTO entry : storeEntryList.getData()) {
+                KnowledgeBase.getInstance().AddOrchestrationStoreEntry(entry);
+                KnowledgeBase.getInstance().AddConsumer(entry.getConsumerSystem(),
+                        "Service_" + entry.getServiceDefinition().getServiceDefinition(),
+                        entry.getProviderSystem().getSystemName());
             }
-
         }
     }
 
@@ -316,24 +178,5 @@ public class Monitor {
 
         KnowledgeBase.getInstance().AddObservation(observationId, sensorId, timestamp, value, featureOfInterest, unit,
                 datatype);
-    }
-
-    private void saveConsumersToFile() {
-        try {
-            FileWriter csvWriter = new FileWriter(consumerCSV);
-            for (Entry<String, BaseConsumer> entry : consumers.entrySet()) {
-                Iterator<String> servicesIterator = entry.getValue().getServices().iterator();
-                while (servicesIterator.hasNext()) {
-                    csvWriter.append(entry.getValue().getSystemName());
-                    csvWriter.append(",");
-                    csvWriter.append(servicesIterator.next());
-                    csvWriter.append("\n");
-                }
-            }
-            csvWriter.flush();
-            csvWriter.close();
-        } catch (Exception e) {
-
-        }
     }
 }

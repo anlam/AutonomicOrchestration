@@ -31,6 +31,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import eu.arrowhead.autonomic.orchestrator.store.OrchestrationStoreEntryDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
+
 @Service
 public class KnowledgeBase {
 
@@ -38,6 +41,8 @@ public class KnowledgeBase {
 
     private ReentrantLock lock;
     private static final Logger log = LoggerFactory.getLogger(KnowledgeBase.class);
+
+    // private TreeMap<String, >
 
     // private KnowledgeBaseWorker knowledgeBaseWorker;
 
@@ -96,6 +101,16 @@ public class KnowledgeBase {
             model.setNsPrefix(":", OntologyNames.BASE_URL);
             model.setNsPrefix("rdfs", RDFS.uri);
             model.setNsPrefix("xsd", XSD.NS);
+
+            model.setNsPrefix("rdf", RDF.getURI());
+            model.setNsPrefix("sai", OntologyNames.SAI_URL);
+            model.setNsPrefix("san", OntologyNames.SAN_URL);
+            model.setNsPrefix("dul", OntologyNames.DUL_URL);
+            model.setNsPrefix("dogont", OntologyNames.DOGONT_URL);
+            model.setNsPrefix("msm", OntologyNames.MSM_URL);
+            model.setNsPrefix("ioto", OntologyNames.IOTO_URL);
+            model.setNsPrefix("ssn", OntologyNames.SSN_URL);
+            model.setNsPrefix("muo", OntologyNames.MUO_URL);
 
             FileOutputStream newFile = new FileOutputStream(new File(filename));
             model.write(newFile, "TTL");
@@ -174,6 +189,16 @@ public class KnowledgeBase {
             model.setNsPrefix(":", OntologyNames.BASE_URL);
             model.setNsPrefix("rdfs", RDFS.uri);
             model.setNsPrefix("xsd", XSD.NS);
+
+            model.setNsPrefix("rdf", RDF.getURI());
+            model.setNsPrefix("sai", OntologyNames.SAI_URL);
+            model.setNsPrefix("san", OntologyNames.SAN_URL);
+            model.setNsPrefix("dul", OntologyNames.DUL_URL);
+            model.setNsPrefix("dogont", OntologyNames.DOGONT_URL);
+            model.setNsPrefix("msm", OntologyNames.MSM_URL);
+            model.setNsPrefix("ioto", OntologyNames.IOTO_URL);
+            model.setNsPrefix("ssn", OntologyNames.SSN_URL);
+            model.setNsPrefix("muo", OntologyNames.MUO_URL);
             // model.write(new FileOutputStream(new File("./dataset.txt")), "TTL" );
 
             dataset.commit();
@@ -217,25 +242,120 @@ public class KnowledgeBase {
         }
     }
 
-    public void AddConsumer(String consumerName, String serviceName, String providerName) {
+    // @formatter:off
+    public void AddConsumerJenaRule(String consumerName, String jenaRule) {
+        lock.lock();
+        Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
+        dataset.begin(ReadWrite.WRITE);
+        try {
+             Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
+
+            String insertString = Constants.PREFIX_STRING
+                                + "insert data { "
+                                    + ":" + consumerName + " :hasJenaRule :" + jenaRule + " . \n"
+//                                + "} where {"
+//                                    + ":" + consumerName + " rdf:type :ArrowheadConsumer . \n"
+                                + "}";
+            UpdateAction.parseExecute(insertString, model);
+
+            dataset.commit();
+        } catch (Exception e) {
+            log.error("Fail to add sensor: " + e.getMessage());
+            System.err.println("Fail to add sensor: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            dataset.end();
+            lock.unlock();
+        }
+
+    }
+
+ // @formatter:off
+    public void AddOrchestrationStoreEntry(OrchestrationStoreEntryDTO entry) {
         lock.lock();
         Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
         dataset.begin(ReadWrite.WRITE);
         try {
             Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
 
-            String deleteString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
-                    + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    + "prefix xsd: <" + XSD.getURI() + ">\n" + "delete data{ " + ":" + consumerName
-                    + " rdf:type :Consumer . \n" + ":" + consumerName + " :consumesService :" + serviceName + " . \n"
-                    + "}";
+            String entryName = "StoreRule_" + entry.getId();
+
+            String insertString = Constants.PREFIX_STRING
+                                + "insert data { "
+                                    + ":" + entryName + " :hasContext :OrchestrationStoreRule . \n"
+                                    + ":" + entryName + " :hasId \"" + entry.getId() + "\"^^xsd:int . \n"
+                                    + ":" + entryName + " :usedInContext " + ":" + entry.getConsumerSystem().getSystemName() + " . \n"
+                                    + ":" + entryName + " :hasServiceUsage " + ":ArrowheadService_" + entry.getServiceDefinition().getServiceDefinition() + " . \n"
+//                                + "} where {"
+//                                    + ":" + consumerName + " rdf:type :ArrowheadConsumer . \n"
+                                + "}";
+            UpdateAction.parseExecute(insertString, model);
+
+            dataset.commit();
+        } catch (Exception e) {
+            log.error("Fail to add sensor: " + e.getMessage());
+            System.err.println("Fail to add sensor: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            dataset.end();
+            lock.unlock();
+        }
+
+    }
+
+ // @formatter:off
+    public void DeleteOrchestrationStoreEntry(String consumerName, String serviceDefinition) {
+        lock.lock();
+        Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
+        dataset.begin(ReadWrite.WRITE);
+        try {
+            Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
+
+            String deleteString = Constants.PREFIX_STRING
+                                + "delete data { "
+                                    + "?storeRule :hasContext :OrchestrationStoreRule . \n"
+                                    + "?storeRule :hasId \" ?id \"^^xsd:int . \n"
+                                    + "?storeRule :usedInContext " + ":" + consumerName + " . \n"
+                                    + "?storeRule :hasServiceUsage " + ":" + serviceDefinition + " . \n"
+                                + "} where {"
+                                    + "?storeRule :usedInContext " + ":" + consumerName + " . \n"
+                                    + "?storeRule :hasServiceUsage " + ":" + serviceDefinition + " . \n"
+                                + "}";
             UpdateAction.parseExecute(deleteString, model);
 
-            String addString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI() + ">\n"
-                    + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    + "prefix xsd: <" + XSD.getURI() + ">\n" + "insert data{ " + ":" + consumerName
-                    + " rdf:type :Consumer . \n" + ":" + consumerName + " :consumesService :" + serviceName + " . \n"
-                    + "}";
+            dataset.commit();
+        } catch (Exception e) {
+            log.error("Fail to add sensor: " + e.getMessage());
+            System.err.println("Fail to add sensor: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            dataset.end();
+            lock.unlock();
+        }
+    }
+
+    // @formatter:off
+    public void AddConsumer(SystemResponseDTO consumer, String serviceName, String providerName) {
+        lock.lock();
+        Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
+        dataset.begin(ReadWrite.WRITE);
+        try {
+            Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
+
+            String deleteString = Constants.PREFIX_STRING
+                                + "delete data{ "
+                                    + ":" + consumer.getSystemName() + " rdf:type :ArrowheadConsumer . \n"
+                                    + ":" + consumer.getSystemName() + " :consumesService :" + serviceName + " . \n"
+                                    + ":" + consumer.getSystemName() + " :hasId \"" + consumer.getId() + "\"^^xsd:int . \n"
+                                + "}";
+            UpdateAction.parseExecute(deleteString, model);
+
+            String addString = Constants.PREFIX_STRING
+                                + "insert data{ "
+                                    + ":" + consumer.getSystemName() + " rdf:type :ArrowheadConsumer . \n"
+                                    + ":" + consumer.getSystemName() + " :consumesService :" + serviceName + " . \n"
+                                    + ":" + consumer.getSystemName() + " :hasId \"" + consumer.getId() + "\"^^xsd:int . \n"
+                                + "}";
 
             UpdateAction.parseExecute(addString, model);
 
@@ -251,14 +371,10 @@ public class KnowledgeBase {
 
     }
 
+    // @formatter:off
     public void AddObservation(String observationId, String sensorId, long timestamp, String value,
             String featureOfInterest, String unit, String datatype) {
         lock.lock();
-
-        log.debug(String.format("Knowledgebase Adding observation %s, %s, %d, %s", observationId, sensorId, timestamp,
-                value));
-        // System.out.println(String.format("Knowledgebase Adding observation %s, %s, %d, %s", observationId, sensorId,
-        // timestamp, value));
 
         Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
         dataset.begin(ReadWrite.WRITE);
@@ -267,40 +383,32 @@ public class KnowledgeBase {
         try {
             Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
 
-            /*
-             * String queryString = "prefix : <"+ OntologyNames.BASE_URL+">\n" +
-             * "prefix rdfs: <"+RDFS.getURI()+">\n" +
-             * "prefix rdf: <"+RDF.getURI()+">\n" +
-             * "prefix sosa: <"+OntologyNames.SOSA_URL+">\n" +
-             * //"select ?obs \n" +
-             * "ask { ?obs rdf:type sosa:Observation . \n" +
-             * "?obs sosa:madeBySensor :" + sensorId + " . \n" +
-             * "}";
-             */
+            String queryString = Constants.PREFIX_STRING
+                                    // "select ?obs \n" +
+                                    + "ask {"
+                                        + ":" + observationId + " rdf:type sosa:Observation . \n"
+                                    + "}";
 
-            String queryString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
-                    + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    +
-                    // "select ?obs \n" +
-                    "ask {" + ":" + observationId + " rdf:type sosa:Observation . \n" + "}";
+            String updateString = Constants.PREFIX_STRING +
+                    "delete { :" + observationId + " sosa:hasSimpleResult ?value. \n" +
+                    ":" + observationId + " sosa:resultTime ?time. \n" +
+                    "} \n" +
+                    "insert { :" + observationId + " sosa:hasSimpleResult \"" + value + "\"^^xsd:" + datatype + " . \n" +
+                    ":" + observationId + " sosa:resultTime  \"" + timestamp + "\"^^xsd:long . \n" +
+                    "} \n" +
+                    "where { :" + observationId + " sosa:hasSimpleResult ?value. \n" +
+                    ":" + observationId + " sosa:resultTime ?time. \n" +
+                    "}";
 
-            String updateString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
-                    + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    + "prefix xsd: <" + XSD.getURI() + ">\n" + "delete { :" + observationId
-                    + " sosa:hasSimpleResult ?value. \n" + ":" + observationId + " sosa:resultTime ?time. \n" + "} \n"
-                    + "insert { :" + observationId + " sosa:hasSimpleResult \"" + value + "\"^^xsd:" + datatype
-                    + " . \n" + ":" + observationId + " sosa:resultTime  \"" + timestamp + "\"^^xsd:long . \n" + "} \n"
-                    + "where { :" + observationId + " sosa:hasSimpleResult ?value. \n" + ":" + observationId
-                    + " sosa:resultTime ?time. \n" + "}";
-
-            String addString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI() + ">\n"
-                    + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    + "prefix xsd: <" + XSD.getURI() + ">\n" + "insert data { " + ":" + observationId
-                    + " rdf:type sosa:Observation . \n" + ":" + observationId + " sosa:madeBySensor :" + sensorId
-                    + " . \n" + ":" + observationId + " sosa:hasFeatureOfInterest :" + featureOfInterest + " . \n" + ":"
-                    + observationId + " sosa:hasSimpleResult \"" + value + "\"^^xsd:" + datatype + " . \n" + ":"
-                    + observationId + " sosa:resultTime  \"" + timestamp + "\"^^xsd:long . \n" + ":" + observationId
-                    + " :hasUnit  \"" + unit + "\" . \n" + "}";
+            String addString = Constants.PREFIX_STRING
+                                + "insert data { "
+                                    + ":" + observationId + " rdf:type sosa:Observation . \n"
+                                    + ":" + observationId + " sosa:madeBySensor :" + sensorId + " . \n"
+                                    + ":" + observationId + " sosa:hasFeatureOfInterest :" + featureOfInterest + " . \n"
+                                    + ":" + observationId + " sosa:hasSimpleResult \"" + value + "\"^^xsd:" + datatype + " . \n"
+                                    + ":" + observationId + " sosa:resultTime  \"" + timestamp + "\"^^xsd:long . \n"
+                                    + ":" + observationId + " :hasUnit  \"" + unit + "\" . \n"
+                                + "}";
 
             // System.out.println(addString);
 
@@ -326,6 +434,7 @@ public class KnowledgeBase {
 
     }
 
+    // @formatter:off
     public void AddSensor(String sensorName, String serviceName, String location, String producer,
             String serviceDefinition) {
         lock.lock();
@@ -338,22 +447,22 @@ public class KnowledgeBase {
 
             Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
 
-            String deleteString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
-                    + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    + "prefix xsd: <" + XSD.getURI() + ">\n" + "delete data{ " + ":" + sensorName
-                    + " rdf:type :SensorUnit . \n"
-                    // ":" + sensorName + " :hasID \"" + sensorName + "\" . \n" +
-                    + ":" + sensorName + " :hasService :" + serviceName + " . \n" + ":" + sensorName
-                    + " sosa:hasLocation :" + location + " . \n" + "}";
+            String deleteString = Constants.PREFIX_STRING
+                                    + "delete data{ "
+                                        + ":" + sensorName + " rdf:type :SensorUnit . \n"
+                                    // ":" + sensorName + " :hasID \"" + sensorName + "\" . \n" +
+                                        + ":" + sensorName + " :hasService :" + serviceName + " . \n"
+                                        + ":" + sensorName + " sosa:hasLocation :" + location + " . \n"
+                                    + "}";
             UpdateAction.parseExecute(deleteString, model);
 
-            String addString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI() + ">\n"
-                    + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    + "prefix xsd: <" + XSD.getURI() + ">\n" + "insert data{ " + ":" + sensorName
-                    + " rdf:type :SensorUnit . \n" +
+            String addString = Constants.PREFIX_STRING
+                                + "insert data{ "
+                                    + ":" + sensorName + " rdf:type :SensorUnit . \n"
                     // ":" + sensorName + " :hasID \"" + sensorName + "\" . \n" +
-                    ":" + sensorName + " :hasService :" + serviceName + " . \n" + ":" + sensorName
-                    + " sosa:hasLocation :" + location + " . \n" + "}";
+                                    + ":" + sensorName + " :hasService :" + serviceName + " . \n"
+                                    + ":" + sensorName + " sosa:hasLocation :" + location + " . \n"
+                                + "}";
 
             UpdateAction.parseExecute(addString, model);
 
@@ -370,6 +479,7 @@ public class KnowledgeBase {
 
     }
 
+    // @formatter:off
     public void AddService(String serviceName, String producer, String serviceDefinition) {
         lock.lock();
 
@@ -380,25 +490,25 @@ public class KnowledgeBase {
 
             Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
 
-            String deleteString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI()
-                    + ">\n" + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    + "prefix xsd: <" + XSD.getURI() + ">\n" + "delete data{ " + ":" + serviceName
-                    + " rdf:type :Service . \n" + ":" + serviceName + " :hasServiceDefinition " + "\""
-                    + serviceDefinition + "\"" + " . \n" + ":" + producer + " rdf:type :Producer . \n" + ":" + producer
-                    + " :producesService :" + serviceName + " . \n" +
-                    // ":" + serviceName + " :hasID \"" + serviceName + "\" . \n" +
+            String deleteString = Constants.PREFIX_STRING +
+                    "delete data{ "   +
+                    ":" + serviceName + " rdf:type :ArrowheadService . \n" +
+                    ":" + serviceName + " :hasServiceDefinition " + "\"" + serviceDefinition +  "\"" + " . \n" +
+                    ":" + producer + " rdf:type :ArrowheadConsumer . \n" +
+                    ":" + producer + " :producesService :" + serviceName + " . \n" +
+                    //":" + serviceName + " :hasID \"" + serviceName + "\" . \n" +
                     "}";
 
             UpdateAction.parseExecute(deleteString, model);
 
-            String addString = "prefix : <" + OntologyNames.BASE_URL + ">\n" + "prefix rdfs: <" + RDFS.getURI() + ">\n"
-                    + "prefix rdf: <" + RDF.getURI() + ">\n" + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                    + "prefix xsd: <" + XSD.getURI() + ">\n" + "insert data{ " + ":" + serviceName
-                    + " rdf:type :Service . \n" + ":" + serviceName + " :hasServiceDefinition " + "\""
-                    + serviceDefinition + "\"" + " . \n" + ":" + producer + " rdf:type :Producer . \n" + ":" + producer
-                    + " :producesService :" + serviceName + " . \n" +
-                    // ":" + serviceName + " :hasID \"" + serviceName + "\" . \n" +
-                    "}";
+            String addString = Constants.PREFIX_STRING
+                                + "insert data{ "
+                                    + ":" + serviceName + " rdf:type :ArrowheadService . \n"
+                                    + ":" + serviceName + " :hasServiceDefinition " + "\"" + serviceDefinition + "\"" + " . \n"
+                                    + ":" + producer + " rdf:type :ArrowheadConsumer . \n"
+                                    + ":" + producer + " :producesService :" + serviceName + " . \n"
+                                    // ":" + serviceName + " :hasID \"" + serviceName + "\" . \n" +
+                                + "}";
 
             UpdateAction.parseExecute(addString, model);
 

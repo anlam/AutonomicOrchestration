@@ -1,19 +1,40 @@
 @prefix :      <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#> .
+@prefix san:   <http://www.irit.fr/recherches/MELODI/ontologies/SAN#> .
+@prefix msm:   <http://iserve.kmi.open.ac.uk/ns/msm#> .
+@prefix muo:   <http://purl.oclc.org/NET/muo/muo#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix dogont: <http://elite.polito.it/ontologies/dogont.owl#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ssn:   <http://purl.oclc.org/NET/ssnx/ssn#> .
+@prefix ioto:  <http://www.irit.fr/recherches/MELODI/ontologies/IoT-O#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sai:   <https://arrowhead.eu/arrowheadtools/sai#> .
+@prefix dul:   <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#> .
 @prefix sosa:  <http://www.w3.org/ns/sosa#> .
 
-:robot_consumer  a        :Consumer ;
-        :consumesService  :temp_service_definition .
+:robot_consumer  a        :ArrowheadConsumer ;
+        :consumesService  :Service_temp_service_definition ;
+        :hasId            23 ;
+        :hasJenaRule      :robot_consumer_rule2 , :robot_consumer_rule3 , :rule5 , :rule6 , :rule8 .
 
-:DateTimeNow  :hasValue  1633385238087 .
+:StoreRule_5  :hasContext  :OrchestrationStoreRule ;
+        :hasId            5 ;
+        :hasServiceUsage  :ArrowheadService_temp_service_definition ;
+        :usedInContext    :robot_consumer .
 
 :Service_temp_service_definition
-        a                      :Service ;
-        :hasServiceDefinition  "temp_service_definition" ;
-        :hasState              :OnlineState .
+        a                      :ArrowheadService ;
+        :hasServiceDefinition  "temp_service_definition" .
 
-:robot_producer  a        :Producer ;
+:DateTimeNow  :hasValue  1633771030974 .
+
+:rule5  :hasBody  "[ rule5: (?p1 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s1) (?p2 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) (?c <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) -> substituteService(?p1 ?s1 ?p2 ?s2 ?c) ]" .
+
+:rule6  :hasBody  "[ rule6: (?p1 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s1) (?p2 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) (?c <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) -> substituteService(?p1 ?s1 ?p2 ?s2 ?c) ]" .
+
+:rule8  :hasBody  "[ rule8: (?p1 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s1) (?p2 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) (?c <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) -> substituteService(?p1 ?s1 ?p2 ?s2 ?c) ]" .
+
+:robot_producer  a        :ArrowheadConsumer ;
         :producesService  :Service_temp_service_definition , :Service_humidity_service_definition , :Service_pressure_service_definition .
 
 :temp_sensor  a           :SensorUnit ;
@@ -24,14 +45,13 @@
         a                          sosa:Observation ;
         :hasUnit                   "celsius" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "5.599700349580209"^^xsd:double ;
+        sosa:hasSimpleResult       "-9.97538185108089"^^xsd:double ;
         sosa:madeBySensor          :temp_sensor ;
-        sosa:resultTime            1633385234291 .
+        sosa:resultTime            1633767260262 .
 
 :Service_humidity_service_definition
-        a                      :Service ;
-        :hasServiceDefinition  "humidity_service_definition" ;
-        :hasState              :OnlineState .
+        a                      :ArrowheadService ;
+        :hasServiceDefinition  "humidity_service_definition" .
 
 :humidity_sensor  a       :SensorUnit ;
         :hasService       :Service_humidity_service_definition ;
@@ -41,14 +61,13 @@
         a                          sosa:Observation ;
         :hasUnit                   "Percentage" ;
         sosa:hasFeatureOfInterest  :Humidity ;
-        sosa:hasSimpleResult       "0.17887382961813275"^^xsd:double ;
+        sosa:hasSimpleResult       "7.680307686609732"^^xsd:double ;
         sosa:madeBySensor          :humidity_sensor ;
-        sosa:resultTime            1633385234291 .
+        sosa:resultTime            1633767260262 .
 
 :Service_pressure_service_definition
-        a                      :Service ;
-        :hasServiceDefinition  "pressure_service_definition" ;
-        :hasState              :OnlineState .
+        a                      :ArrowheadService ;
+        :hasServiceDefinition  "pressure_service_definition" .
 
 :pressure_sensor  a       :SensorUnit ;
         :hasService       :Service_pressure_service_definition ;
@@ -58,6 +77,6 @@
         a                          sosa:Observation ;
         :hasUnit                   "Pa" ;
         sosa:hasFeatureOfInterest  :Pressure ;
-        sosa:hasSimpleResult       "31.005241257810034"^^xsd:double ;
+        sosa:hasSimpleResult       "0.6957238485144827"^^xsd:double ;
         sosa:madeBySensor          :pressure_sensor ;
-        sosa:resultTime            1633385234291 .
+        sosa:resultTime            1633767260262 .
