@@ -344,16 +344,16 @@ public class KnowledgeBase {
 
             String deleteString = Constants.PREFIX_STRING
                                 + "delete data{ "
-                                    + ":" + consumer.getSystemName() + " rdf:type :ArrowheadConsumer . \n"
-                                    + ":" + consumer.getSystemName() + " :consumesService :" + serviceName + " . \n"
+                                    + ":" + consumer.getSystemName() + " rdf:type sai:ArrowheadConsumer . \n"
+                                    + ":" + consumer.getSystemName() + " sai:consumesService :" + serviceName + " . \n"
                                     + ":" + consumer.getSystemName() + " :hasId \"" + consumer.getId() + "\"^^xsd:int . \n"
                                 + "}";
             UpdateAction.parseExecute(deleteString, model);
 
             String addString = Constants.PREFIX_STRING
                                 + "insert data{ "
-                                    + ":" + consumer.getSystemName() + " rdf:type :ArrowheadConsumer . \n"
-                                    + ":" + consumer.getSystemName() + " :consumesService :" + serviceName + " . \n"
+                                    + ":" + consumer.getSystemName() + " rdf:type sai:ArrowheadConsumer . \n"
+                                    + ":" + consumer.getSystemName() + " sai:consumesService :" + serviceName + " . \n"
                                     + ":" + consumer.getSystemName() + " :hasId \"" + consumer.getId() + "\"^^xsd:int . \n"
                                 + "}";
 
@@ -451,8 +451,8 @@ public class KnowledgeBase {
                                     + "delete data{ "
                                         + ":" + sensorName + " rdf:type :SensorUnit . \n"
                                     // ":" + sensorName + " :hasID \"" + sensorName + "\" . \n" +
-                                        + ":" + sensorName + " :hasService :" + serviceName + " . \n"
-                                        + ":" + sensorName + " sosa:hasLocation :" + location + " . \n"
+                                        + ":" + sensorName + " sai:hasService :" + serviceName + " . \n"
+                                        + ":" + sensorName + " sai:hasLocation :" + location + " . \n"
                                     + "}";
             UpdateAction.parseExecute(deleteString, model);
 
@@ -460,8 +460,8 @@ public class KnowledgeBase {
                                 + "insert data{ "
                                     + ":" + sensorName + " rdf:type :SensorUnit . \n"
                     // ":" + sensorName + " :hasID \"" + sensorName + "\" . \n" +
-                                    + ":" + sensorName + " :hasService :" + serviceName + " . \n"
-                                    + ":" + sensorName + " sosa:hasLocation :" + location + " . \n"
+                                    + ":" + sensorName + " sai:hasService :" + serviceName + " . \n"
+                                    + ":" + sensorName + " sai:hasLocation :" + location + " . \n"
                                 + "}";
 
             UpdateAction.parseExecute(addString, model);
@@ -492,10 +492,10 @@ public class KnowledgeBase {
 
             String deleteString = Constants.PREFIX_STRING +
                     "delete data{ "   +
-                    ":" + serviceName + " rdf:type :ArrowheadService . \n" +
-                    ":" + serviceName + " :hasServiceDefinition " + "\"" + serviceDefinition +  "\"" + " . \n" +
-                    ":" + producer + " rdf:type :ArrowheadConsumer . \n" +
-                    ":" + producer + " :producesService :" + serviceName + " . \n" +
+                    ":" + serviceName + " rdf:type sai:ArrowheadService . \n" +
+                    ":" + serviceName + " sai:hasServiceDefinition " + "\"" + serviceDefinition +  "\"" + " . \n" +
+                    ":" + producer + " rdf:type sai:ArrowheadConsumer . \n" +
+                    ":" + producer + " sai:producesService :" + serviceName + " . \n" +
                     //":" + serviceName + " :hasID \"" + serviceName + "\" . \n" +
                     "}";
 
@@ -503,10 +503,10 @@ public class KnowledgeBase {
 
             String addString = Constants.PREFIX_STRING
                                 + "insert data{ "
-                                    + ":" + serviceName + " rdf:type :ArrowheadService . \n"
-                                    + ":" + serviceName + " :hasServiceDefinition " + "\"" + serviceDefinition + "\"" + " . \n"
-                                    + ":" + producer + " rdf:type :ArrowheadConsumer . \n"
-                                    + ":" + producer + " :producesService :" + serviceName + " . \n"
+                                    + ":" + serviceName + " rdf:type sai:ArrowheadService . \n"
+                                    + ":" + serviceName + " sai:hasServiceDefinition " + "\"" + serviceDefinition + "\"" + " . \n"
+                                    + ":" + producer + " rdf:type sai:ArrowheadConsumer . \n"
+                                    + ":" + producer + " sai:producesService :" + serviceName + " . \n"
                                     // ":" + serviceName + " :hasID \"" + serviceName + "\" . \n" +
                                 + "}";
 

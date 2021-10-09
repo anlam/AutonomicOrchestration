@@ -12,34 +12,27 @@
 @prefix dul:   <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#> .
 @prefix sosa:  <http://www.w3.org/ns/sosa#> .
 
-:robot_consumer  a        :ArrowheadConsumer ;
-        :consumesService  :Service_temp_service_definition ;
-        :hasId            23 ;
-        :hasJenaRule      :robot_consumer_rule2 , :robot_consumer_rule3 , :rule5 , :rule6 , :rule8 .
-
 :StoreRule_5  :hasContext  :OrchestrationStoreRule ;
         :hasId            5 ;
         :hasServiceUsage  :ArrowheadService_temp_service_definition ;
         :usedInContext    :robot_consumer .
 
+:robot_consumer  a           sai:ArrowheadConsumer ;
+        :hasId               23 ;
+        sai:consumesService  :Service_temp_service_definition .
+
 :Service_temp_service_definition
-        a                      :ArrowheadService ;
-        :hasServiceDefinition  "temp_service_definition" .
+        a                         sai:ArrowheadService ;
+        sai:hasServiceDefinition  "temp_service_definition" .
 
-:DateTimeNow  :hasValue  1633771030974 .
+:DateTimeNow  :hasValue  1633780278700 .
 
-:rule5  :hasBody  "[ rule5: (?p1 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s1) (?p2 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) (?c <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) -> substituteService(?p1 ?s1 ?p2 ?s2 ?c) ]" .
+:robot_producer  a           sai:ArrowheadConsumer ;
+        sai:producesService  :Service_temp_service_definition , :Service_humidity_service_definition , :Service_pressure_service_definition .
 
-:rule6  :hasBody  "[ rule6: (?p1 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s1) (?p2 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) (?c <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) -> substituteService(?p1 ?s1 ?p2 ?s2 ?c) ]" .
-
-:rule8  :hasBody  "[ rule8: (?p1 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s1) (?p2 <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) (?c <http://elite.polito.it/ontologies/dogont.owl#hasState> ?s2) -> substituteService(?p1 ?s1 ?p2 ?s2 ?c) ]" .
-
-:robot_producer  a        :ArrowheadConsumer ;
-        :producesService  :Service_temp_service_definition , :Service_humidity_service_definition , :Service_pressure_service_definition .
-
-:temp_sensor  a           :SensorUnit ;
-        :hasService       :Service_temp_service_definition ;
-        sosa:hasLocation  :unknown .
+:temp_sensor  a          :SensorUnit ;
+        sai:hasLocation  :unknown ;
+        sai:hasService   :Service_temp_service_definition .
 
 :Observation_temp_sensor
         a                          sosa:Observation ;
@@ -50,12 +43,12 @@
         sosa:resultTime            1633767260262 .
 
 :Service_humidity_service_definition
-        a                      :ArrowheadService ;
-        :hasServiceDefinition  "humidity_service_definition" .
+        a                         sai:ArrowheadService ;
+        sai:hasServiceDefinition  "humidity_service_definition" .
 
-:humidity_sensor  a       :SensorUnit ;
-        :hasService       :Service_humidity_service_definition ;
-        sosa:hasLocation  :unknown .
+:humidity_sensor  a      :SensorUnit ;
+        sai:hasLocation  :unknown ;
+        sai:hasService   :Service_humidity_service_definition .
 
 :Observation_humidity_sensor
         a                          sosa:Observation ;
@@ -66,12 +59,12 @@
         sosa:resultTime            1633767260262 .
 
 :Service_pressure_service_definition
-        a                      :ArrowheadService ;
-        :hasServiceDefinition  "pressure_service_definition" .
+        a                         sai:ArrowheadService ;
+        sai:hasServiceDefinition  "pressure_service_definition" .
 
-:pressure_sensor  a       :SensorUnit ;
-        :hasService       :Service_pressure_service_definition ;
-        sosa:hasLocation  :unknown .
+:pressure_sensor  a      :SensorUnit ;
+        sai:hasLocation  :unknown ;
+        sai:hasService   :Service_pressure_service_definition .
 
 :Observation_pressure_sensor
         a                          sosa:Observation ;
