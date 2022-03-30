@@ -27,7 +27,7 @@ import eu.arrowhead.autonomic.orchestrator.mgmt.ArrowheadMgmtService;
 public class Execute {
 
     // private ExecuteWorker executeWorker;
-    private TreeMap<String, String> consumerOrchestrationPushEndpointTreeMap;
+    private TreeMap<String, Literal> consumerOrchestrationPushEndpointTreeMap;
 
     @Autowired
     private ArrowheadMgmtService arrowheadMgmtService;
@@ -38,7 +38,7 @@ public class Execute {
 
     public Execute(Plan plan) {
         // executeWorker = new ExecuteWorker(this, Constants.ExecuteWorkerInterval);
-        consumerOrchestrationPushEndpointTreeMap = new TreeMap<String, String>();
+        consumerOrchestrationPushEndpointTreeMap = new TreeMap<String, Literal>();
         this.plan = plan;
     }
 
@@ -87,9 +87,9 @@ public class Execute {
                     System.out.println("Execute found adapation plan for: " + entry.getKey());
                     System.out.println(adaptPlan);
 
-                    String orchPushEp = consumerOrchestrationPushEndpointTreeMap.get(entry.getKey());
-                    OrchestrationPushWorker orchestrationPushWorker = new OrchestrationPushWorker(this, plan,
-                            entry.getKey(), adaptPlan, orchPushEp, 0, null);
+                    Literal orchPushEp = consumerOrchestrationPushEndpointTreeMap.get(entry.getKey());
+                    OrchestrationPushWorker orchestrationPushWorker = new OrchestrationPushWorker(arrowheadMgmtService,
+                            this, plan, entry.getKey(), orchPushEp.getInt(), adaptPlan);
                     orchestrationPushWorker.start();
                 }
             }
@@ -104,24 +104,19 @@ public class Execute {
     // @formatter:off
     private void getOrchestrationPushEndpoints() {
         String queryString = Constants.PREFIX_STRING
-                + "select ?c ?s ?a \n" + "where { " +
+                + "select ?c ?id \n" + "where { " +
                 // "?c rdf:type :Consumer . \n" +
-                "?c :producesService ?s . \n" + "?s :hasServiceDefinition \"" + Constants.OrchestrationPushDefinition
-                + "\" . \n" + "?s :hasOperation ?o . \n" + "?o :hasAddress ?a . \n" + "}";
+                "?c rdf:type sai:ArrowheadConsumer . \n"
+                + "?c :hasId ?id . \n" + "}";
 
         List<QuerySolution> results = KnowledgeBase.getInstance().ExecuteSelectQuery(queryString);
         for (QuerySolution soln : results) {
             Resource consumer = soln.getResource("c");
             String consumerName = consumer.getLocalName();
 
-            Literal address = soln.getLiteral("a");
-            String addressString = address.getString();
+            Literal id = soln.getLiteral("id");
 
-            log.debug("Execute found orchestration push endpoint for " + consumerName + "at: " + addressString);
-            // System.out.println("Execute found orchestration push endpoint for " + consumerName + "at: " +
-            // addressString);
-            // System.out.println(addressString);
-            consumerOrchestrationPushEndpointTreeMap.put(consumerName, addressString);
+            consumerOrchestrationPushEndpointTreeMap.put(consumerName, id);
 
         }
     }

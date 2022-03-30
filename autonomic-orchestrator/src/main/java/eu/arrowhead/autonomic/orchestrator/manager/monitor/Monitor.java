@@ -13,6 +13,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import ai.aitia.arrowhead.application.library.ArrowheadService;
+import ai.aitia.arrowhead.application.library.util.CoreServiceUri;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.KnowledgeBase;
 import eu.arrowhead.autonomic.orchestrator.manager.monitor.model.BaseConsumer;
@@ -20,9 +22,6 @@ import eu.arrowhead.autonomic.orchestrator.manager.monitor.model.BaseConsumerFac
 import eu.arrowhead.autonomic.orchestrator.mgmt.ArrowheadMgmtService;
 import eu.arrowhead.autonomic.orchestrator.store.OrchestrationStoreEntryDTO;
 import eu.arrowhead.autonomic.orchestrator.store.OrchestrationStoreResponseDTO;
-//import no.prediktor.apis.demo.consumer.DemoConsumer;
-import eu.arrowhead.client.library.ArrowheadService;
-import eu.arrowhead.client.library.util.CoreServiceUri;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.core.CoreSystemService;
 import eu.arrowhead.common.dto.shared.DataManagerServicesResponseDTO;
@@ -150,7 +149,7 @@ public class Monitor {
                     if (response[0].getT() != null) {
                         time = response[0].getT().longValue();
                     }
-                    KnowledgeBase.getInstance().AddSensor(response[0].getBn(), "Service_" + service, "unknown",
+                    KnowledgeBase.getInstance().AddSensor(response[0].getBn(), service, "unknown",
                             entry.getValue().getSystemName(), service);
                     AddObservation("Observation_" + response[0].getBn(), response[0].getBn(), time,
                             Double.toString(response[0].getV()), response[0].getN(), response[0].getU(), "double");
@@ -165,7 +164,7 @@ public class Monitor {
             for (OrchestrationStoreEntryDTO entry : storeEntryList.getData()) {
                 KnowledgeBase.getInstance().AddOrchestrationStoreEntry(entry);
                 KnowledgeBase.getInstance().AddConsumer(entry.getConsumerSystem(),
-                        "Service_" + entry.getServiceDefinition().getServiceDefinition(),
+                        entry.getServiceDefinition().getServiceDefinition(),
                         entry.getProviderSystem().getSystemName());
             }
         }

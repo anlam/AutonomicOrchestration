@@ -15,6 +15,7 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.InfModel;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Statement;
@@ -106,7 +107,7 @@ public class KnowledgeBase {
             model.setNsPrefix("sai", OntologyNames.SAI_URL);
             model.setNsPrefix("san", OntologyNames.SAN_URL);
             model.setNsPrefix("dul", OntologyNames.DUL_URL);
-            model.setNsPrefix("dogont", OntologyNames.DOGONT_URL);
+            model.setNsPrefix("DOGONT", OntologyNames.DOGONT_URL);
             model.setNsPrefix("msm", OntologyNames.MSM_URL);
             model.setNsPrefix("ioto", OntologyNames.IOTO_URL);
             model.setNsPrefix("ssn", OntologyNames.SSN_URL);
@@ -194,7 +195,7 @@ public class KnowledgeBase {
             model.setNsPrefix("sai", OntologyNames.SAI_URL);
             model.setNsPrefix("san", OntologyNames.SAN_URL);
             model.setNsPrefix("dul", OntologyNames.DUL_URL);
-            model.setNsPrefix("dogont", OntologyNames.DOGONT_URL);
+            model.setNsPrefix("DOGONT", OntologyNames.DOGONT_URL);
             model.setNsPrefix("msm", OntologyNames.MSM_URL);
             model.setNsPrefix("ioto", OntologyNames.IOTO_URL);
             model.setNsPrefix("ssn", OntologyNames.SSN_URL);
@@ -285,7 +286,7 @@ public class KnowledgeBase {
                                     + ":" + entryName + " :hasContext :OrchestrationStoreRule . \n"
                                     + ":" + entryName + " :hasId \"" + entry.getId() + "\"^^xsd:int . \n"
                                     + ":" + entryName + " :usedInContext " + ":" + entry.getConsumerSystem().getSystemName() + " . \n"
-                                    + ":" + entryName + " :hasServiceUsage " + ":ArrowheadService_" + entry.getServiceDefinition().getServiceDefinition() + " . \n"
+                                    + ":" + entryName + " :hasServiceUsage " + ":" + entry.getServiceDefinition().getServiceDefinition() + " . \n"
 //                                + "} where {"
 //                                    + ":" + consumerName + " rdf:type :ArrowheadConsumer . \n"
                                 + "}";
@@ -304,17 +305,34 @@ public class KnowledgeBase {
     }
 
  // @formatter:off
-    public void DeleteOrchestrationStoreEntry(String consumerName, String serviceDefinition) {
+    public String DeleteOrchestrationStoreEntry(String consumerName, String serviceDefinition) {
+        String entryId = null;
         lock.lock();
         Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
         dataset.begin(ReadWrite.WRITE);
         try {
             Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
 
+            String queryString = Constants.PREFIX_STRING
+                    + "select ?id \n"
+                    + "where {"
+                        + "?storeRule :usedInContext " + ":" + consumerName + " . \n"
+                        + "?storeRule :hasServiceUsage " + ":" + serviceDefinition + " . \n"
+                        + "?storeRule :hasId ?id . \n"
+                    + "}";
+
+            List<QuerySolution> results = KnowledgeBase.getInstance().ExecuteSelectQuery(queryString);
+
+            for (QuerySolution soln : results) {
+                Literal body = soln.getLiteral("id");
+                entryId = body.getString();
+
+            }
+
             String deleteString = Constants.PREFIX_STRING
-                                + "delete data { "
+                                + "delete { "
                                     + "?storeRule :hasContext :OrchestrationStoreRule . \n"
-                                    + "?storeRule :hasId \" ?id \"^^xsd:int . \n"
+                                    + "?storeRule :hasId ?id . \n"
                                     + "?storeRule :usedInContext " + ":" + consumerName + " . \n"
                                     + "?storeRule :hasServiceUsage " + ":" + serviceDefinition + " . \n"
                                 + "} where {"
@@ -332,6 +350,7 @@ public class KnowledgeBase {
             dataset.end();
             lock.unlock();
         }
+        return entryId;
     }
 
     // @formatter:off
@@ -494,7 +513,7 @@ public class KnowledgeBase {
                     "delete data{ "   +
                     ":" + serviceName + " rdf:type sai:ArrowheadService . \n" +
                     ":" + serviceName + " sai:hasServiceDefinition " + "\"" + serviceDefinition +  "\"" + " . \n" +
-                    ":" + producer + " rdf:type sai:ArrowheadConsumer . \n" +
+                    ":" + producer + " rdf:type sai:ArrowheadProducer . \n" +
                     ":" + producer + " sai:producesService :" + serviceName + " . \n" +
                     //":" + serviceName + " :hasID \"" + serviceName + "\" . \n" +
                     "}";
@@ -505,7 +524,7 @@ public class KnowledgeBase {
                                 + "insert data{ "
                                     + ":" + serviceName + " rdf:type sai:ArrowheadService . \n"
                                     + ":" + serviceName + " sai:hasServiceDefinition " + "\"" + serviceDefinition + "\"" + " . \n"
-                                    + ":" + producer + " rdf:type sai:ArrowheadConsumer . \n"
+                                    + ":" + producer + " rdf:type sai:ArrowheadProducer . \n"
                                     + ":" + producer + " sai:producesService :" + serviceName + " . \n"
                                     // ":" + serviceName + " :hasID \"" + serviceName + "\" . \n" +
                                 + "}";

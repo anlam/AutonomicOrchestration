@@ -3,7 +3,7 @@ package eu.arrowhead.autonomic.orchestrator.store;
 import java.io.Serializable;
 
 import eu.arrowhead.common.dto.shared.CloudRequestDTO;
-import eu.arrowhead.common.dto.shared.SystemRequestDTO;
+import eu.arrowhead.common.dto.shared.SystemResponseDTO;
 
 public class OrchestrationStoreRequestDTO implements Serializable {
 
@@ -15,7 +15,7 @@ public class OrchestrationStoreRequestDTO implements Serializable {
     private String serviceDefinitionName;
     private int consumerSystemId;
     private AttributeDTO attribute;
-    private SystemRequestDTO providerSystem;
+    private SystemResponseDTO providerSystem;
     private CloudRequestDTO cloud;
     private String serviceInterfaceName;
     private String priority;
@@ -47,11 +47,11 @@ public class OrchestrationStoreRequestDTO implements Serializable {
         this.attribute = attribute;
     }
 
-    public SystemRequestDTO getProviderSystem() {
+    public SystemResponseDTO getProviderSystem() {
         return providerSystem;
     }
 
-    public void setProviderSystem(SystemRequestDTO providerSystem) {
+    public void setProviderSystem(SystemResponseDTO providerSystem) {
         this.providerSystem = providerSystem;
     }
 

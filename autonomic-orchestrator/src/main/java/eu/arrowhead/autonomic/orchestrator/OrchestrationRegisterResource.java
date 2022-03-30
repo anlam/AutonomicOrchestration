@@ -80,7 +80,7 @@ public class OrchestrationRegisterResource {
         PrintUtil.registerPrefix("sai", OntologyNames.SAI_URL);
         PrintUtil.registerPrefix("san", OntologyNames.SAN_URL);
         PrintUtil.registerPrefix("dul", OntologyNames.DUL_URL);
-        PrintUtil.registerPrefix("dogont", OntologyNames.DOGONT_URL);
+        PrintUtil.registerPrefix("DOGONT", OntologyNames.DOGONT_URL);
         PrintUtil.registerPrefix("msm", OntologyNames.MSM_URL);
         PrintUtil.registerPrefix("ioto", OntologyNames.IOTO_URL);
         PrintUtil.registerPrefix("ssn", OntologyNames.SSN_URL);
@@ -123,6 +123,7 @@ public class OrchestrationRegisterResource {
     @ResponseBody
     public String getKnowledgeBase() {
         String fileContext = "";
+        System.out.println("request knowledge base");
 
         try {
             fileContext = new String(Files.readAllBytes(Paths.get(Constants.knowledgeBaseFileName)));

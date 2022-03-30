@@ -5,30 +5,21 @@
   <groupId>eu.arrowhead</groupId>
   <artifactId>autonomic-orchestrator</artifactId>
   <version>1.0.1</version>
-  <packaging>jar</packaging>
 
   <name>autonomic-orchestrator</name>
   <url>http://maven.apache.org</url>
-
-	<properties>
-	   <maven.compiler.source>1.8</maven.compiler.source>
-	   <maven.compiler.target>1.8</maven.compiler.target>	   
-	</properties>
-	
-		<repositories>
-		<repository>
-			<id>arrowhead-client</id>
-			<url>https://github.com/arrowhead-f/client-library-java-spring/raw/master/client-mvn-repo</url>
-		</repository>
-	</repositories>
+  
+  <properties>
+     <maven.compiler.source>1.8</maven.compiler.source>
+     <maven.compiler.target>1.8</maven.compiler.target>
+</properties>
 
   <dependencies>
-  
-  		<dependency>
-			<groupId>eu.arrowhead</groupId>
-			<artifactId>client-library</artifactId>
-			<version>4.3.0.0</version>
-		</dependency>
+  	<dependency>
+        <groupId>ai.aitia</groupId>
+        <artifactId>arrowhead-application-library-java-spring</artifactId>
+        <version>4.4.0.0</version>
+    </dependency>
   
   	<dependency>
        <groupId>javax.ws.rs</groupId>
@@ -102,6 +93,7 @@
 
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>copy-resources</id>
@@ -110,7 +102,6 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-						    <mainClass>eu.arrowhead.autonomic.orchestrator.OrchestrationRegisterProvider</mainClass>
 							<outputDirectory>${basedir}/target</outputDirectory>
 							<resources>
 								<resource>

@@ -234,6 +234,8 @@ public class Plan {
         for (QuerySolution consumer : consumers) {
             Resource system = consumer.getResource("s");
             String systemName = system.getLocalName();
+            log.debug("Plan: New consumer registered: " + consumer);
+            System.out.println("Plan: New consumer registered: " + consumer);
             if (!ConsumerRulesTreeMap.containsKey(systemName)) {
                 ConsumerRulesTreeMap.put(systemName, new ArrayList<Rule>());
             }
@@ -294,6 +296,8 @@ public class Plan {
         PrintUtil.removePrefix("rdfs");
         PrintUtil.removePrefix("xsd");
         PrintUtil.removePrefix("rdf");
+        PrintUtil.removePrefix("sai");
+        PrintUtil.removePrefix("DOGONT");
 
         for (Rule r : rules) {
             updateCurentTimeQuery = updateCurentTimeQuery

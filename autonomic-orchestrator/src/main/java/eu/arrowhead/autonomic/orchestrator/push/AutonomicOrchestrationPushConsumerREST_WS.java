@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.gson.Gson;
 
+import ai.aitia.arrowhead.application.library.ArrowheadService;
 import eu.arrowhead.autonomic.orchestrator.manager.plan.model.AdaptationPlan;
 import eu.arrowhead.autonomic.orchestrator.mgmt.ArrowheadMgmtService;
-import eu.arrowhead.client.library.ArrowheadService;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.SSLProperties;
 import eu.arrowhead.common.http.HttpService;

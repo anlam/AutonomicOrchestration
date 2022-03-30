@@ -1,17 +1,19 @@
 prefix : <http://www.semanticweb.org/an.nlam/ontologies/2017/1/AutoIoT#>
+prefix sai: <https://arrowhead.eu/arrowheadtools/sai#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix sosa: <http://www.w3.org/ns/sosa#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-delete { ?service :hasState :OfflineState} 
-insert { ?service :hasState :OnlineState}  
+prefix DOGONT: <http://elite.polito.it/ontologies/dogont.owl#>
+delete { ?service DOGONT:hasState :OfflineState} 
+insert { ?service DOGONT:hasState :OnlineState}  
 where { ?sensor rdf:type :SensorUnit . 
-?service rdf:type :Service . 
+?service rdf:type sai:ArrowheadService . 
 ?observation rdf:type sosa:Observation . 
 ?observation sosa:madeBySensor  ?sensor . 
-?sensor :hasService  ?service . 
+?sensor sai:hasService  ?service . 
 ?observation sosa:resultTime ?time . 
-#?service :hasState :OfflineState . 
+#?service DOGONT:hasState :OfflineState . 
 :DateTimeNow :hasValue ?now . 
 filter(?time > ?now - 5000) . 
 }

@@ -19,11 +19,11 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
+import ai.aitia.arrowhead.application.library.ArrowheadService;
+import ai.aitia.arrowhead.application.library.config.ApplicationInitListener;
+import ai.aitia.arrowhead.application.library.util.ApplicationCommonConstants;
 import eu.arrowhead.autonomic.orchestrator.manager.knowledge.Constants;
 import eu.arrowhead.autonomic.orchestrator.mgmt.ArrowheadMgmtService;
-import eu.arrowhead.client.library.ArrowheadService;
-import eu.arrowhead.client.library.config.ApplicationInitListener;
-import eu.arrowhead.client.library.util.ClientCommonConstants;
 import eu.arrowhead.client.skeleton.provider.security.ProviderSecurityConfig;
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.Utilities;
@@ -48,19 +48,19 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
     @Autowired
     private ProviderSecurityConfig providerSecurityConfig;
 
-    @Value(ClientCommonConstants.$TOKEN_SECURITY_FILTER_ENABLED_WD)
+    @Value(ApplicationCommonConstants.$TOKEN_SECURITY_FILTER_ENABLED_WD)
     private boolean tokenSecurityFilterEnabled;
 
     @Value(CommonConstants.$SERVER_SSL_ENABLED_WD)
     private boolean sslEnabled;
 
-    @Value(ClientCommonConstants.$CLIENT_SYSTEM_NAME)
+    @Value(ApplicationCommonConstants.$APPLICATION_SYSTEM_NAME)
     private String mySystemName;
 
-    @Value(ClientCommonConstants.$CLIENT_SERVER_ADDRESS_WD)
+    @Value(ApplicationCommonConstants.$APPLICATION_SERVER_ADDRESS_WD)
     private String mySystemAddress;
 
-    @Value(ClientCommonConstants.$CLIENT_SERVER_PORT_WD)
+    @Value(ApplicationCommonConstants.$APPLICATION_SERVER_PORT_WD)
     private int mySystemPort;
 
     private final Logger logger = LogManager.getLogger(ProviderApplicationInitListener.class);
@@ -71,9 +71,10 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
     // -------------------------------------------------------------------------------------------------
     @Override
     protected void customInit(final ContextRefreshedEvent event) {
+        checkConfiguration();
 
         // Checking the availability of necessary core systems
-        checkCoreSystemReachability(CoreSystem.SERVICE_REGISTRY);
+        checkCoreSystemReachability(CoreSystem.SERVICEREGISTRY);
         // Initialize Arrowhead Context
         arrowheadService.updateCoreServiceURIs(CoreSystem.ORCHESTRATOR);
         arrowheadService.updateCoreServiceURIs(CoreSystem.DATAMANAGER);
@@ -152,22 +153,39 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
     // -------------------------------------------------------------------------------------------------
     @Override
     public void customDestroy() {
-        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllRulesDefinition);
-        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllRules2Definition);
-        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllQueriesDefinition);
-        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllKnowledgeDefinition);
-        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationRegisterDefinition);
-        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationDeleteDefinition);
-        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationPushDefinition);
-        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetDefinition);
-        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllConsumersDefinition);
-        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationServiceRegisterDefinition);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllRulesDefinition,
+                Constants.OrchestrationGetAllRulesURI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllRules2Definition,
+                Constants.OrchestrationGetAllRules2URI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllQueriesDefinition,
+                Constants.OrchestrationGetAllQueriesURI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllKnowledgeDefinition,
+                Constants.OrchestrationGetAllKnowledgeURI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationRegisterDefinition,
+                Constants.OrchestrationRegisterURI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationDeleteDefinition,
+                Constants.OrchestrationDeleteURI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationPushDefinition,
+                Constants.OrchestrationPushURI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetDefinition,
+                Constants.OrchestrationGetURI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllConsumersDefinition,
+                Constants.OrchestrationGetAllConsumersURI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationServiceRegisterDefinition,
+                Constants.OrchestrationServiceRegisterURI);
     }
 
     // =================================================================================================
     // assistant methods
 
     // -------------------------------------------------------------------------------------------------
+    private void checkConfiguration() {
+        if (!sslEnabled && tokenSecurityFilterEnabled) {
+            logger.warn("Contradictory configuration:");
+            logger.warn("token.security.filter.enabled=true while server.ssl.enabled=false");
+        }
+    }
+
     private void setTokenSecurityFilter() {
         final PublicKey authorizationPublicKey = arrowheadService.queryAuthorizationPublicKey();
         if (authorizationPublicKey == null) {
@@ -179,7 +197,7 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
             keystore = KeyStore.getInstance(sslProperties.getKeyStoreType());
             keystore.load(sslProperties.getKeyStore().getInputStream(),
                     sslProperties.getKeyStorePassword().toCharArray());
-        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException ex) {
+        } catch (final KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException ex) {
             throw new ArrowheadException(ex.getMessage());
         }
         final PrivateKey providerPrivateKey = Utilities.getPrivateKey(keystore, sslProperties.getKeyPassword());
@@ -198,7 +216,7 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
         systemRequest.setAddress(mySystemAddress);
         systemRequest.setPort(mySystemPort);
 
-        if (tokenSecurityFilterEnabled) {
+        if (sslEnabled && tokenSecurityFilterEnabled) {
             systemRequest.setAuthenticationInfo(
                     Base64.getEncoder().encodeToString(arrowheadService.getMyPublicKey().getEncoded()));
             serviceRegistryRequest.setSecure(ServiceSecurityType.TOKEN.name());

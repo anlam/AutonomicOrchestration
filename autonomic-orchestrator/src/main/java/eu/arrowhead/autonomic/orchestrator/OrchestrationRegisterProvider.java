@@ -6,8 +6,6 @@ import org.apache.jena.sys.JenaSystem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -22,8 +20,8 @@ import eu.arrowhead.common.SSLProperties;
 @SpringBootApplication
 @EnableAsync
 @EnableScheduling
-@ComponentScan(basePackages = { CommonConstants.BASE_PACKAGE })
-public class OrchestrationRegisterProvider implements ApplicationRunner {
+@ComponentScan(basePackages = { CommonConstants.BASE_PACKAGE, "ai.aitia" })
+public class OrchestrationRegisterProvider {
     // =================================================================================================
     // members
 
@@ -45,13 +43,6 @@ public class OrchestrationRegisterProvider implements ApplicationRunner {
     public Executor monitorExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         return executor;
-    }
-
-    // -------------------------------------------------------------------------------------------------
-
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        // TODO Auto-generated method stub
     }
 
 }

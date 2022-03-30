@@ -55,7 +55,7 @@ public class Constants {
     public static final String OrchestrationServiceRegisterDefinition = "auto-orchestration-service-register";
     public static final String OrchestrationServiceRegisterURI = "auto/orchestration/serviceregister";
 
-    public static final int SubstitutionParameterSize = 6;
+    public static final int SubstitutionParameterSize = 4;
     public static final int ConfigureParameterSize = 4;
 
     public static final String INTERFACE_SECURE = "HTTPS-SECURE-JSON";
@@ -68,5 +68,6 @@ public class Constants {
                                         + "prefix rdfs: <" + RDFS.getURI() + ">\n"
                                         + "prefix rdf: <" + RDF.getURI() + ">\n"
                                         + "prefix sosa: <" + OntologyNames.SOSA_URL + ">\n"
-                                        + "prefix xsd: <" + XSD.getURI() + ">\n";
+                                        + "prefix xsd: <" + XSD.getURI() + ">\n"
+                                        + "prefix DOGONT: <" + OntologyNames.DOGONT_URL + ">\n";
 }

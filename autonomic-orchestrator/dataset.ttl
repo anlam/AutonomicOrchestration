@@ -3,73 +3,33 @@
 @prefix msm:   <http://iserve.kmi.open.ac.uk/ns/msm#> .
 @prefix muo:   <http://purl.oclc.org/NET/muo/muo#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
-@prefix dogont: <http://elite.polito.it/ontologies/dogont.owl#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix ssn:   <http://purl.oclc.org/NET/ssnx/ssn#> .
 @prefix ioto:  <http://www.irit.fr/recherches/MELODI/ontologies/IoT-O#> .
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix sai:   <https://arrowhead.eu/arrowheadtools/sai#> .
 @prefix dul:   <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#> .
+@prefix DOGONT: <http://elite.polito.it/ontologies/dogont.owl#> .
 @prefix sosa:  <http://www.w3.org/ns/sosa#> .
 
-:StoreRule_5  :hasContext  :OrchestrationStoreRule ;
-        :hasId            5 ;
-        :hasServiceUsage  :ArrowheadService_temp_service_definition ;
-        :usedInContext    :robot_consumer .
+:DateTimeNow  :hasValue  1641771512901 .
 
-:robot_consumer  a           sai:ArrowheadConsumer ;
-        :hasId               23 ;
-        sai:consumesService  :Service_temp_service_definition .
-
-:Service_temp_service_definition
+:temperature1_service
         a                         sai:ArrowheadService ;
-        sai:hasServiceDefinition  "temp_service_definition" .
+        DOGONT:hasState           :OfflineState ;
+        sai:hasServiceDefinition  "temperature1_service" .
 
-:DateTimeNow  :hasValue  1633780278700 .
+:temperature1  a             sai:ArrowheadProducer ;
+        sai:producesService  :temperature1_service .
 
-:robot_producer  a           sai:ArrowheadConsumer ;
-        sai:producesService  :Service_temp_service_definition , :Service_humidity_service_definition , :Service_pressure_service_definition .
-
-:temp_sensor  a          :SensorUnit ;
+:temp1_sensor  a         :SensorUnit ;
         sai:hasLocation  :unknown ;
-        sai:hasService   :Service_temp_service_definition .
+        sai:hasService   :temperature1_service .
 
-:Observation_temp_sensor
+:Observation_temp1_sensor
         a                          sosa:Observation ;
         :hasUnit                   "celsius" ;
         sosa:hasFeatureOfInterest  :Temperature ;
-        sosa:hasSimpleResult       "-9.97538185108089"^^xsd:double ;
-        sosa:madeBySensor          :temp_sensor ;
-        sosa:resultTime            1633767260262 .
-
-:Service_humidity_service_definition
-        a                         sai:ArrowheadService ;
-        sai:hasServiceDefinition  "humidity_service_definition" .
-
-:humidity_sensor  a      :SensorUnit ;
-        sai:hasLocation  :unknown ;
-        sai:hasService   :Service_humidity_service_definition .
-
-:Observation_humidity_sensor
-        a                          sosa:Observation ;
-        :hasUnit                   "Percentage" ;
-        sosa:hasFeatureOfInterest  :Humidity ;
-        sosa:hasSimpleResult       "7.680307686609732"^^xsd:double ;
-        sosa:madeBySensor          :humidity_sensor ;
-        sosa:resultTime            1633767260262 .
-
-:Service_pressure_service_definition
-        a                         sai:ArrowheadService ;
-        sai:hasServiceDefinition  "pressure_service_definition" .
-
-:pressure_sensor  a      :SensorUnit ;
-        sai:hasLocation  :unknown ;
-        sai:hasService   :Service_pressure_service_definition .
-
-:Observation_pressure_sensor
-        a                          sosa:Observation ;
-        :hasUnit                   "Pa" ;
-        sosa:hasFeatureOfInterest  :Pressure ;
-        sosa:hasSimpleResult       "0.6957238485144827"^^xsd:double ;
-        sosa:madeBySensor          :pressure_sensor ;
-        sosa:resultTime            1633767260262 .
+        sosa:hasSimpleResult       "15.145773024111882"^^xsd:double ;
+        sosa:madeBySensor          :temp1_sensor ;
+        sosa:resultTime            1637159167788 .
