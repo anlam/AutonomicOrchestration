@@ -107,6 +107,18 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
                 Constants.OrchestrationGetAllQueriesDefinition, Constants.OrchestrationGetAllQueriesURI,
                 HttpMethod.GET);
         arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_3);
+        
+     // @Get all queries
+        final ServiceRegistryRequestDTO serviceRegistryRequest_31 = createServiceRegistryRequest(
+                Constants.OrchestrationEditQueryDefinition, Constants.OrchestrationEditQueryURI,
+                HttpMethod.POST);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_31);
+        
+     // @Get all queries
+        final ServiceRegistryRequestDTO serviceRegistryRequest_32 = createServiceRegistryRequest(
+                Constants.OrchestrationDeleteQueryDefinition, Constants.OrchestrationDeleteQueryURI,
+                HttpMethod.DELETE);
+        arrowheadService.forceRegisterServiceToServiceRegistry(serviceRegistryRequest_32);
 
         // @Get all knowledge
         final ServiceRegistryRequestDTO serviceRegistryRequest_4 = createServiceRegistryRequest(
@@ -159,6 +171,10 @@ public class ProviderApplicationInitListener extends ApplicationInitListener {
                 Constants.OrchestrationGetAllRules2URI);
         arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllQueriesDefinition,
                 Constants.OrchestrationGetAllQueriesURI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationEditQueryDefinition,
+                Constants.OrchestrationEditQueryURI);
+        arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationDeleteQueryDefinition,
+                Constants.OrchestrationDeleteQueryURI);
         arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationGetAllKnowledgeDefinition,
                 Constants.OrchestrationGetAllKnowledgeURI);
         arrowheadService.unregisterServiceFromServiceRegistry(Constants.OrchestrationRegisterDefinition,

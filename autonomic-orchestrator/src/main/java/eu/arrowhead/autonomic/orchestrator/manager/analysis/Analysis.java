@@ -1,6 +1,7 @@
 package eu.arrowhead.autonomic.orchestrator.manager.analysis;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -51,6 +52,46 @@ public class Analysis {
 
     public TreeMap<String, String> getAllQuries() {
         return (TreeMap<String, String>) this.queries.clone();
+    }
+    
+    public boolean EditQuery(String name, String newQuery) {
+    	this.queries.replace(name, newQuery);
+    	
+    	//write to file
+    	try {
+    		boolean valid = KnowledgeBase.getInstance().CheckValidQuery(newQuery);
+    		
+    		if (!valid) {
+    			return false;
+    		}
+    		String fileName = name + ".sparql";
+    		//File myObj = new File(fileName);
+    		//myObj.createNewFile();
+    		
+    		FileWriter myWriter = new FileWriter(Constants.analysisQueriesDir + File.separator + fileName);
+    		myWriter.write(newQuery);
+    		myWriter.close();
+    		return true;
+	    } catch (IOException e) {
+	    	System.out.println("An error occurred.");
+	    	e.printStackTrace();
+	    	return false;
+	    }
+    }
+    
+    public boolean DeleteQuery(String name) {
+    	this.queries.remove(name);
+    	
+    	//delete file
+    	String fileName = name;
+    	File myObj = new File(Constants.analysisQueriesDir + File.separator + fileName); 
+        if (myObj.delete()) { 
+          System.out.println("Deleted the file: " + myObj.getName());
+          return true;
+        } else {
+          System.out.println("Failed to delete the file." + myObj.getName());
+          return false;
+        } 
     }
 
     private void UpdateQueries() {

@@ -24,6 +24,7 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -117,6 +119,32 @@ public class OrchestrationRegisterResource {
 
         }
         return queriesRequest;
+    }
+    
+    @PostMapping(path = Constants.OrchestrationEditQueryURI, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public AnalysisQueryRequest editQuery(@RequestBody AnalysisQueryRequest query) {
+        boolean success = analysis.EditQuery(query.getName(), query.getQuery());
+        if (success) {
+        	return query;
+        }
+        else {
+        	throw new ResponseStatusException(
+        	           HttpStatus.BAD_REQUEST, "Invalid query", null);
+        }
+    }
+    
+    @DeleteMapping(path = Constants.OrchestrationDeleteQueryURI)
+    @ResponseBody
+    public AnalysisQueryRequest deleteQuery(@RequestBody AnalysisQueryRequest query) {
+    	boolean success = analysis.DeleteQuery(query.getName());
+    	if (success) {
+        	return query;
+        }
+    	else {
+        	throw new ResponseStatusException(
+        	           HttpStatus.INTERNAL_SERVER_ERROR, "Cannot delete", null);
+        }
     }
 
     @GetMapping(path = Constants.OrchestrationGetAllKnowledgeURI, produces = MediaType.APPLICATION_JSON_VALUE)

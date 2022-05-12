@@ -33,6 +33,12 @@ public class Constants {
 
     public static final String OrchestrationGetAllQueriesDefinition = "auto-orchestration-get-all-queries";
     public static final String OrchestrationGetAllQueriesURI = "auto/orchestration/queries";
+    
+    public static final String OrchestrationEditQueryDefinition = "auto-orchestration-edit-query";
+    public static final String OrchestrationEditQueryURI = "auto/orchestration/queries/edit";
+    
+    public static final String OrchestrationDeleteQueryDefinition = "auto-orchestration-delete-query";
+    public static final String OrchestrationDeleteQueryURI = "auto/orchestration/queries/delete";
 
     public static final String OrchestrationGetAllKnowledgeDefinition = "auto-orchestration-get-knowledge";
     public static final String OrchestrationGetAllKnowledgeURI = "auto/orchestration/knowledge";

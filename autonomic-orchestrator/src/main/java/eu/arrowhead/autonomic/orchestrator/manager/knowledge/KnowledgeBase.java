@@ -166,6 +166,30 @@ public class KnowledgeBase {
 
         return ret;
     }
+    
+    public boolean CheckValidQuery(String query) {
+    	lock.lock();
+
+        Dataset dataset = TDBFactory.createDataset(Constants.datasetDir);
+        dataset.begin(ReadWrite.WRITE);
+        boolean success;
+
+        try {
+
+            Model model = dataset.getNamedModel(OntologyNames.BASE_URL + Constants.ModelName);
+
+            UpdateAction.parseExecute(query, model);
+            
+            success = true;
+        } catch (Exception e) {
+            log.error("Fail to validate query");
+            success = false;
+        } finally {
+            lock.unlock();
+            
+        }
+        return success;
+    }
 
     public void ExecuteUpdateQueries(List<String> queries) {
         lock.lock();
